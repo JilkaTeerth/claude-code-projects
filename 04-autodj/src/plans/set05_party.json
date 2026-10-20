@@ -1,0 +1,188 @@
+{
+ "title": "Set 05: party block (critic round 2)",
+ "tracks": [
+  {
+   "id": "Usher - DJ Got Us Fallin' In Love",
+   "analysis": "analysis/Usher_DJ_Got_Us_Fallin_In_Love.json",
+   "play_bpm": 120,
+   "start_bar": 13
+  },
+  {
+   "id": "Katy Perry - Last Friday Night",
+   "analysis": "analysis/Katy_Perry_Last_Friday_Night.json",
+   "play_bpm": 128
+  },
+  {
+   "id": "Rihanna - We Found Love",
+   "analysis": "analysis/Rihanna_We_Found_Love.json",
+   "play_bpm": 128
+  },
+  {
+   "id": "Zedd - Clarity",
+   "analysis": "analysis/Zedd_Clarity.json",
+   "play_bpm": 128
+  },
+  {
+   "id": "Pitbull - Give Me Everything",
+   "analysis": "analysis/Pitbull_Give_Me_Everything.json",
+   "play_bpm": 128
+  },
+  {
+   "id": "Justin Bieber - Beauty And A Beat",
+   "analysis": "analysis/Justin_Bieber_Beauty_And_A_Beat.json",
+   "play_bpm": 128
+  },
+  {
+   "id": "Calvin Harris - Feel So Close",
+   "analysis": "analysis/Calvin_Harris_Feel_So_Close.json",
+   "play_bpm": 128
+  },
+  {
+   "id": "Black Eyed Peas - I Gotta Feeling",
+   "analysis": "analysis/The_Black_Eyed_Peas_I_Gotta_Feeling.json",
+   "play_bpm": 128
+  },
+  {
+   "id": "Swedish House Mafia - Don't You Worry Child",
+   "analysis": "analysis/Swedish_House_Mafia_Dont_You_Worry_Child.json",
+   "play_bpm": 128
+  },
+  {
+   "id": "CHRYSTAL - The Days (Notion Remix)",
+   "analysis": "analysis/CHRYSTAL_The_Days_Notion_Remix.json",
+   "play_bpm": 139
+  },
+  {
+   "id": "Rihanna - Disturbia (Blair Muir Remix)",
+   "analysis": "analysis/Rihanna_Disturbia_Blair_Muir_Remix.json",
+   "play_bpm": 139
+  },
+  {
+   "id": "jigitz, Charlotte Plank - car crash",
+   "analysis": "analysis/jigitz_Charlotte_Plank_car_crash.json",
+   "play_bpm": 139
+  },
+  {
+   "id": "The Killers - Mr. Brightside",
+   "analysis": "analysis/The_Killers_Mr_Brightside.json",
+   "play_bpm": 148,
+   "end_bar": 60
+  }
+ ],
+ "transitions": [
+  {
+   "from": "Usher - DJ Got Us Fallin' In Love",
+   "to": "Katy Perry - Last Friday Night",
+   "technique": "strip_drop",
+   "a_exit_bar": 45,
+   "b_entry_bar": 28,
+   "bars": 8,
+   "why": "after Usher's 'DJ got us falling in love' chorus and 'dance like it's the last night of your life', he strips down and Katy drops in one bar before 'There's a stranger in my bed' (video skit skipped)"
+  },
+  {
+   "from": "Katy Perry - Last Friday Night",
+   "to": "Rihanna - We Found Love",
+   "technique": "vocal_carry",
+   "a_exit_bar": 68,
+   "b_entry_bar": 23,
+   "bars": 8,
+   "why": "same key: Katy's 'T.G.I.F... do it all again' rides over We Found Love's intro, low end swaps on bar 4, Rihanna's verse picks up as Katy finishes"
+  },
+  {
+   "from": "Rihanna - We Found Love",
+   "to": "Zedd - Clarity",
+   "technique": "strip_drop",
+   "a_exit_bar": 59,
+   "b_entry_bar": 21,
+   "bars": 4,
+   "why": "right after the first 'we found love in a hopeless place' chorus, a 4 bar strip, and Foxes' pickup 'Cause you are the piece of me' leads Clarity in"
+  },
+  {
+   "from": "Zedd - Clarity",
+   "to": "Pitbull - Give Me Everything",
+   "technique": "acapella_over",
+   "a_exit_bar": 49,
+   "b_entry_bar": 12,
+   "bars": 12,
+   "opts": {
+    "build_bars": 4
+   },
+   "why": "Clarity's 'if our love is tragedy' chorus ends, its drop hits and Ne-Yo's 'we might not get tomorrow' pre-chorus rides it for 12 bars (4B to 5B); beats swap exactly on 'Give me everything tonight'"
+  },
+  {
+   "from": "Pitbull - Give Me Everything",
+   "to": "Justin Bieber - Beauty And A Beat",
+   "technique": "strip_drop",
+   "a_exit_bar": 44,
+   "b_entry_bar": 28,
+   "bars": 4,
+   "why": "Pitbull's 'I promise tonight' ends his verse over a strip down, Bieber's 'Young money' pickup leads his beat in"
+  },
+  {
+   "from": "Justin Bieber - Beauty And A Beat",
+   "to": "Calvin Harris - Feel So Close",
+   "technique": "vocal_carry",
+   "a_exit_bar": 60,
+   "b_entry_bar": 54,
+   "bars": 8,
+   "why": "8B to 9B: 'when the music makes you move... time's up' rides over Feel So Close's drop, then Calvin's 'I feel so close to you right now'"
+  },
+  {
+   "from": "Calvin Harris - Feel So Close",
+   "to": "Black Eyed Peas - I Gotta Feeling",
+   "technique": "vocal_carry",
+   "a_exit_bar": 78,
+   "b_entry_bar": 7,
+   "bars": 8,
+   "why": "same key (9B): Calvin's chorus carries over I Gotta Feeling's intro beat, then 'I gotta feeling' takes over"
+  },
+  {
+   "from": "Black Eyed Peas - I Gotta Feeling",
+   "to": "Swedish House Mafia - Don't You Worry Child",
+   "technique": "vocal_carry",
+   "a_exit_bar": 43,
+   "b_entry_bar": 7,
+   "bars": 8,
+   "why": "9B to 10B: the 'tonight's gonna be a good night' hook rides over the SHM piano, low end swaps, 'I was a king, I had a golden throne' starts as the hook ends"
+  },
+  {
+   "from": "Swedish House Mafia - Don't You Worry Child",
+   "to": "CHRYSTAL - The Days (Notion Remix)",
+   "technique": "strip_drop",
+   "a_exit_bar": 43,
+   "b_entry_bar": 42,
+   "bars": 4,
+   "opts": {
+    "gap_beats": 2
+   },
+   "why": "the first 'don't you worry child' chorus strips down before the live crowd talk, tempo steps to 139 and 'Do you think about the days' starts"
+  },
+  {
+   "from": "CHRYSTAL - The Days (Notion Remix)",
+   "to": "Rihanna - Disturbia (Blair Muir Remix)",
+   "technique": "cut",
+   "a_exit_bar": 74,
+   "b_entry_bar": 46,
+   "bars": 0,
+   "why": "the 'don't think about it too much' hook ends, hard cut into Disturbia's verse"
+  },
+  {
+   "from": "Rihanna - Disturbia (Blair Muir Remix)",
+   "to": "jigitz, Charlotte Plank - car crash",
+   "technique": "loop_roll",
+   "a_exit_bar": 82,
+   "b_entry_bar": 32,
+   "bars": 2,
+   "why": "after the 'disturb you' hook, Rihanna's last word stutters (1, 1/2, 1/4 beat loops) and car crash's hook slams in"
+  },
+  {
+   "from": "jigitz, Charlotte Plank - car crash",
+   "to": "The Killers - Mr. Brightside",
+   "technique": "strip_drop",
+   "a_exit_bar": 68,
+   "b_entry_bar": 4,
+   "bars": 8,
+   "why": "same key (3B), 139 to 148: 'fall down to your grip again' over a strip down, riser, and Brightside's guitar riff into 'Coming out of my cage'"
+  }
+ ]
+}

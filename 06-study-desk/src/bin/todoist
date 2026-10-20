@@ -1,0 +1,269 @@
+#!/usr/bin/env python3
+"""Todoist CLI (API v1). Reads creds from ~/.todoist_env
+Usage:
+  todoist projects
+  todoist tasks [project]           # open tasks, soonest first
+  todoist add "<content>" [--due "tomorrow 9am"] [--project NAME] [--priority 1-4] [--note "..."] [--desc "..."]
+  todoist done <task_id>
+  todoist sync-canvas [days]        # mirror Canvas deadlines into the per-class projects (default 21)
+  todoist watch-canvas [days]       # ALSO catch announcements, new files and undated quizzes (default 7)
+  todoist raw <METHOD> <path> [json-body]
+"""
+import json, os, re, sys, subprocess, datetime
+import urllib.request, urllib.error
+
+ENV = os.path.expanduser("~/.todoist_env")
+if not os.path.exists(ENV):
+    sys.exit("No ~/.todoist_env. Create it with:\n  TODOIST_TOKEN=<api token>")
+cfg = dict(l.strip().split("=", 1) for l in open(ENV)
+           if l.strip() and not l.startswith("#") and "=" in l)
+TOK = cfg.get("TODOIST_TOKEN", "").strip()
+if not TOK:
+    sys.exit("~/.todoist_env has no TODOIST_TOKEN=")
+
+BASE = "https://api.todoist.com/api/v1"
+
+def call(method, path, body=None):
+    data = json.dumps(body).encode() if body is not None else None
+    h = {"Authorization": "Bearer " + TOK}
+    if data:
+        h["Content-Type"] = "application/json"
+    req = urllib.request.Request(BASE + path, data=data, headers=h, method=method)
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            raw = r.read().decode().strip()
+            return json.loads(raw) if raw else None
+    except urllib.error.HTTPError as e:
+        sys.exit("Todoist API %s: %s" % (e.code, e.read().decode()[:400]))
+
+def get_all(path):
+    """GET a list endpoint, unwrapping {results, next_cursor} and following pagination."""
+    out, cursor = [], None
+    while True:
+        p = path + (("&" if "?" in path else "?") + "cursor=" + cursor if cursor else "")
+        d = call("GET", p)
+        if isinstance(d, list):
+            return d
+        out.extend(d.get("results", []))
+        cursor = d.get("next_cursor")
+        if not cursor:
+            return out
+
+def projects():   return get_all("/projects")
+def open_tasks(): return get_all("/tasks")
+
+def find_project(name):
+    if not name: return None
+    ps = projects()
+    for p in ps:
+        if p["name"].lower() == name.lower(): return p["id"]
+    for p in ps:
+        if name.lower() in p["name"].lower(): return p["id"]
+    return None
+
+def ensure_project(name):
+    return find_project(name) or call("POST", "/projects", {"name": name})["id"]
+
+def cmd_projects():
+    for p in projects():
+        print("%-26s %s" % (p["name"], p["id"]))
+
+def cmd_tasks(argv):
+    pid = find_project(argv[0]) if argv else None
+    names = {p["id"]: p["name"] for p in projects()}
+    ts = [t for t in open_tasks() if not t.get("checked")]
+    ts.sort(key=lambda t: ((t.get("due") or {}).get("date") or "9999", -t.get("priority", 1)))
+    for t in ts:
+        if pid and t["project_id"] != pid: continue
+        due = (t.get("due") or {}).get("date", "") or ""
+        if due.endswith("Z"):  # UTC stamp: show the Eastern date, not the UTC one
+            import datetime, zoneinfo
+            due = datetime.datetime.fromisoformat(due.replace("Z", "+00:00")).astimezone(
+                zoneinfo.ZoneInfo("America/New_York")).date().isoformat()
+        pr = {4: "p1", 3: "p2", 2: "p3", 1: "  "}.get(t.get("priority", 1), "  ")
+        print("%-18s %-11s %s  %-42s [%s]" % (t["id"], due[:10], pr, t["content"][:42],
+                                              names.get(t["project_id"], "")))
+
+def cmd_add(argv):
+    if not argv:
+        sys.exit('usage: todoist add "<content>" [--due "..."] [--project N] [--priority 1-4] [--note "..."] [--desc "..."]')
+    body, note, i = {"content": argv[0]}, None, 1
+    while i < len(argv) - 1:
+        f, v = argv[i], argv[i + 1]
+        if   f == "--due":      body["due_string"] = v
+        elif f == "--project":  body["project_id"] = ensure_project(v)
+        elif f == "--priority": body["priority"] = int(v)
+        elif f == "--note":     note = v                  # becomes a comment
+        elif f == "--desc":     body["description"] = v   # the task's own description field
+        i += 2
+    t = call("POST", "/tasks", body)
+    if note:
+        call("POST", "/comments", {"task_id": t["id"], "content": note})
+    print("added %s  %s" % (t["id"], t["content"]))
+
+def cmd_done(argv):
+    if not argv: sys.exit("usage: todoist done <task_id>")
+    call("POST", "/tasks/%s/close" % argv[0])
+    print("closed", argv[0])
+
+MONTHS = dict(Jan=1, Feb=2, Mar=3, Apr=4, May=5, Jun=6, Jul=7,
+              Aug=8, Sep=9, Oct=10, Nov=11, Dec=12)
+ROW = re.compile(r"^\s*\w{3}\s+(\d{1,2})\s+(\w{3}),\s+(\d{2}):(\d{2})\s+in\s+\S+\s+(\S+)\s+\S+\s+(.+?)\s*$")
+
+COURSE_PROJECT = {
+    "MAT-230":   "MAT 230",
+    "CPS-112":   "CPS 112",
+    "MAT-215":   "DSC 215",
+    "DSC-215":   "DSC 215",
+    "ANT-100":   "ANT 100",
+}
+
+def project_for(course):
+    """Map a Canvas course code like MAT-215-A onto one of the four class projects."""
+    for prefix, name in COURSE_PROJECT.items():
+        if course.upper().startswith(prefix):
+            return name
+    return None
+
+def cmd_sync_canvas(argv):
+    days = argv[0] if argv else "21"
+    out = subprocess.run([os.path.expanduser("~/bin/canvas"), "upcoming", days],
+                         capture_output=True, text=True).stdout
+    pids = {n: ensure_project(n) for n in set(COURSE_PROJECT.values())}
+    existing = {}
+    for t in open_tasks():
+        existing.setdefault(t["project_id"], set()).add(t["content"])
+    today, added, seen, skipped = datetime.date.today(), 0, 0, 0
+    for line in out.splitlines():
+        m = ROW.match(line)
+        if not m:
+            continue
+        seen += 1
+        day, mon, hh, mm, course, title = m.groups()
+        name = project_for(course)
+        if not name:
+            print("no project for course %s, skipping: %s" % (course, title))
+            skipped += 1
+            continue
+        pid = pids[name]
+        if title in existing.get(pid, set()):
+            continue
+        month = MONTHS.get(mon[:3], today.month)
+        year = today.year + (1 if month < today.month - 6 else 0)
+        call("POST", "/tasks", {
+            "content": title, "project_id": pid, "priority": 3,
+            "due_datetime": "%04d-%02d-%02dT%s:%s:00" % (year, month, int(day), hh, mm),
+        })
+        print("%-10s %s" % (name, title))
+        added += 1
+    print("%d new, %d already there, %d unrouted" % (added, seen - added - skipped, skipped))
+
+
+SEEN = os.path.expanduser("~/.todoist_canvas_seen.json")
+
+def load_seen():
+    try:
+        return json.load(open(SEEN))
+    except Exception:
+        return {"announcements": [], "files": [], "assignments": []}
+
+def save_seen(d):
+    json.dump(d, open(SEEN, "w"), indent=1)
+
+def canvas_api(path):
+    """Call the Canvas API through the canvas CLI's raw command."""
+    out = subprocess.run([os.path.expanduser("~/bin/canvas"), "raw", path],
+                         capture_output=True, text=True).stdout
+    try:
+        return json.loads(out)
+    except Exception:
+        return []
+
+def cmd_watch_canvas(argv):
+    """Catch what sync-canvas misses: announcements, newly posted files, and undated
+    assignments/quizzes. Anything new becomes a Todoist task; seen ids are remembered."""
+    days = int(argv[0]) if argv else 7
+    seen = load_seen()
+    courses = canvas_api("/api/v1/courses?enrollment_state=active&per_page=50")
+    if not isinstance(courses, list):
+        sys.exit("could not read Canvas courses")
+    pids = {n: ensure_project(n) for n in set(COURSE_PROJECT.values())}
+    cutoff = (datetime.datetime.now(datetime.timezone.utc)
+              - datetime.timedelta(days=days)).isoformat()
+    added = 0
+
+    for c in courses:
+        code = c.get("course_code", "") or ""
+        name = project_for(code)
+        if not name:
+            continue
+        pid, cid = pids[name], c["id"]
+
+        # announcements
+        for a in canvas_api("/api/v1/announcements?context_codes[]=course_%d&per_page=20" % cid) or []:
+            key = "a%s" % a.get("id")
+            if key in seen["announcements"]:
+                continue
+            seen["announcements"].append(key)
+            if (a.get("posted_at") or "") < cutoff:
+                continue
+            body = re.sub(r"<[^>]+>", " ", a.get("message") or "")
+            body = re.sub(r"\s+", " ", body).strip()[:900]
+            t = call("POST", "/tasks", {"content": "Read: " + (a.get("title") or "announcement"),
+                                        "project_id": pid, "priority": 1, "due_string": "today"})
+            if body:
+                call("POST", "/comments", {"task_id": t["id"], "content": body})
+            print("%-9s announcement: %s" % (name, a.get("title"))); added += 1
+
+        # newly posted files
+        for f in canvas_api("/api/v1/courses/%d/files?sort=created_at&order=desc&per_page=15" % cid) or []:
+            key = "f%s" % f.get("id")
+            if key in seen["files"]:
+                continue
+            seen["files"].append(key)
+            if (f.get("created_at") or "") < cutoff:
+                continue
+            t = call("POST", "/tasks", {"content": "Download: " + (f.get("display_name") or "file"),
+                                        "project_id": pid, "priority": 1, "due_string": "today"})
+            call("POST", "/comments", {"task_id": t["id"],
+                "content": "Posted %s. the professor in particular expects lecture PDFs printed and "
+                           "brought to class." % (f.get("created_at") or "")[:10]})
+            print("%-9s file: %s" % (name, f.get("display_name"))); added += 1
+
+        # assignments and quizzes with NO due date, which sync-canvas cannot see
+        for a in canvas_api("/api/v1/courses/%d/assignments?per_page=50" % cid) or []:
+            key = "s%s" % a.get("id")
+            if key in seen["assignments"]:
+                continue
+            seen["assignments"].append(key)
+            if a.get("due_at"):
+                continue  # dated ones are handled by sync-canvas
+            sub = a.get("submission") or {}
+            if sub.get("score") is not None:
+                continue  # already graded, nothing to do
+            t = call("POST", "/tasks", {"content": a.get("name") or "assignment",
+                                        "project_id": pid, "priority": 2})
+            call("POST", "/comments", {"task_id": t["id"],
+                "content": "Canvas has NO due date on this one, so it will never appear in the "
+                           "normal deadline sync. Worth %s points. %s" %
+                           (a.get("points_possible"), a.get("html_url") or "")})
+            print("%-9s undated: %s" % (name, a.get("name"))); added += 1
+
+    save_seen(seen)
+    print("%d new item(s)" % added)
+
+def main():
+    if len(sys.argv) < 2: sys.exit(__doc__)
+    cmd, argv = sys.argv[1], sys.argv[2:]
+    if   cmd == "projects":    cmd_projects()
+    elif cmd == "tasks":       cmd_tasks(argv)
+    elif cmd == "add":         cmd_add(argv)
+    elif cmd == "done":        cmd_done(argv)
+    elif cmd == "sync-canvas": cmd_sync_canvas(argv)
+    elif cmd == "watch-canvas": cmd_watch_canvas(argv)
+    elif cmd == "raw":
+        print(json.dumps(call(argv[0].upper(), argv[1],
+              json.loads(argv[2]) if len(argv) > 2 else None), indent=2))
+    else: sys.exit(__doc__)
+
+main()

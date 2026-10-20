@@ -1,0 +1,29 @@
+#!/bin/zsh
+# Wrapper for the launchd job. Timestamps, caps the log, and makes failure LOUD.
+# The predecessor job died silently with exit 0 for 9 days; that must not repeat.
+LOG=~/Library/Logs/canvas-sweep.log
+PY=$HOME/.pyenv/versions/3.12.11/bin/python3
+[ -x "$PY" ] || PY=/usr/bin/python3
+{
+  echo "--- $(date '+%Y-%m-%d %H:%M:%S') ---"
+  "$PY" $HOME/bin/canvas-sweep 2>&1
+  rc=$?
+  # Rebuild study guides off the same cadence. Cheap, idempotent, and it means a guide
+  # exists before he needs it rather than when he remembers to ask.
+  "$PY" $HOME/.study-desk/parse_syllabus.py 2>&1 | tail -1
+  "$PY" $HOME/bin/study-guide --days 21 2>&1 | tail -3
+  # DSC 215 announces quizzes, exams and homework lists only inside handouts
+  "$PY" $HOME/bin/dsc215-watch 2>&1 | tail -4
+  # Self-heal the dashboard too (2026-10-03): launchd once left it parked and never respawned it.
+  if ! curl -s -o /dev/null -m 3 http://localhost:7474/; then
+    echo "!!! study desk was down, kickstarting"
+    launchctl kickstart -k gui/501/com.teerth.studydesk
+  fi
+  if [ $rc -ne 0 ]; then
+    echo "!!! canvas-sweep FAILED rc=$rc"
+    /opt/homebrew/bin/terminal-notifier -title "Canvas sweep FAILED" \
+      -message "rc=$rc. Todoist is going stale." 2>/dev/null
+  fi
+} >> "$LOG" 2>&1
+# keep the log to the last 2000 lines
+tail -n 2000 "$LOG" > "$LOG.tmp" 2>/dev/null && mv "$LOG.tmp" "$LOG"

@@ -1,0 +1,1263 @@
+{
+  "version": 1,
+  "looks": [
+    {
+      "id": "sundeck",
+      "name": "Sundeck",
+      "family": "warm-negative",
+      "version": 1,
+      "focal": 26,
+      "frame": "none",
+      "halation": {
+        "strength": 0.35,
+        "threshold": 0.78,
+        "softness": 0.12,
+        "tint": [
+          1.0,
+          0.3,
+          0.12
+        ],
+        "radius_pct": 0.012,
+        "scales": [
+          1.0,
+          3.0,
+          9.0
+        ],
+        "weights": [
+          0.5,
+          0.35,
+          0.15
+        ]
+      },
+      "grain": {
+        "amount": 0.036,
+        "size_px1000": 2.2,
+        "mu": 0.45,
+        "sigma": 0.28,
+        "shadow_floor": 0.05,
+        "chroma": 0.3,
+        "octaves": 2
+      },
+      "vignette": {
+        "amount": 0.22,
+        "radius": 0.78,
+        "softness": 0.45,
+        "roundness": 1.0
+      },
+      "optics": {
+        "aberration": 0.0,
+        "softness": 0.0
+      },
+      "leak": {
+        "strength": 0.0,
+        "seed": 0,
+        "tint": [
+          1.0,
+          0.42,
+          0.14
+        ]
+      },
+      "stamp": {
+        "enabled": false,
+        "size_pct": 0.035,
+        "corner": "bottomRight",
+        "tint": [
+          1.0,
+          0.36,
+          0.06
+        ],
+        "glow": 1.0
+      },
+      "lut": {
+        "data": "luts/c8936de9be87e6b17676ddf1a16927642b2fac338e50ebfb40bd3de3880a11c6.cubedata",
+        "size": 33,
+        "amount": 1.0,
+        "sha256": "c8936de9be87e6b17676ddf1a16927642b2fac338e50ebfb40bd3de3880a11c6"
+      }
+    },
+    {
+      "id": "terracotta",
+      "name": "Terracotta",
+      "family": "warm-negative",
+      "version": 1,
+      "focal": 26,
+      "frame": "none",
+      "halation": {
+        "strength": 0.45,
+        "threshold": 0.74,
+        "softness": 0.12,
+        "tint": [
+          1.0,
+          0.3,
+          0.12
+        ],
+        "radius_pct": 0.014,
+        "scales": [
+          1.0,
+          3.0,
+          9.0
+        ],
+        "weights": [
+          0.5,
+          0.35,
+          0.15
+        ]
+      },
+      "grain": {
+        "amount": 0.042,
+        "size_px1000": 2.6,
+        "mu": 0.45,
+        "sigma": 0.28,
+        "shadow_floor": 0.05,
+        "chroma": 0.3,
+        "octaves": 2
+      },
+      "vignette": {
+        "amount": 0.3,
+        "radius": 0.78,
+        "softness": 0.45,
+        "roundness": 1.0
+      },
+      "optics": {
+        "aberration": 0.0,
+        "softness": 0.0
+      },
+      "leak": {
+        "strength": 0.0,
+        "seed": 0,
+        "tint": [
+          1.0,
+          0.42,
+          0.14
+        ]
+      },
+      "stamp": {
+        "enabled": false,
+        "size_pct": 0.035,
+        "corner": "bottomRight",
+        "tint": [
+          1.0,
+          0.36,
+          0.06
+        ],
+        "glow": 1.0
+      },
+      "lut": {
+        "data": "luts/44af9fd4f1509a3247b0abc1e9eeafafe686802d9324234231ba56de0dfd3d27.cubedata",
+        "size": 33,
+        "amount": 1.0,
+        "sha256": "44af9fd4f1509a3247b0abc1e9eeafafe686802d9324234231ba56de0dfd3d27"
+      }
+    },
+    {
+      "id": "honeyline",
+      "name": "Honeyline",
+      "family": "warm-negative",
+      "version": 1,
+      "focal": 26,
+      "frame": "none",
+      "halation": {
+        "strength": 0.22,
+        "threshold": 0.82,
+        "softness": 0.12,
+        "tint": [
+          1.0,
+          0.3,
+          0.12
+        ],
+        "radius_pct": 0.01,
+        "scales": [
+          1.0,
+          3.0,
+          9.0
+        ],
+        "weights": [
+          0.5,
+          0.35,
+          0.15
+        ]
+      },
+      "grain": {
+        "amount": 0.024,
+        "size_px1000": 1.8,
+        "mu": 0.45,
+        "sigma": 0.24,
+        "shadow_floor": 0.05,
+        "chroma": 0.3,
+        "octaves": 2
+      },
+      "vignette": {
+        "amount": 0.12,
+        "radius": 0.78,
+        "softness": 0.45,
+        "roundness": 1.0
+      },
+      "optics": {
+        "aberration": 0.0,
+        "softness": 0.0
+      },
+      "leak": {
+        "strength": 0.0,
+        "seed": 0,
+        "tint": [
+          1.0,
+          0.42,
+          0.14
+        ]
+      },
+      "stamp": {
+        "enabled": false,
+        "size_pct": 0.035,
+        "corner": "bottomRight",
+        "tint": [
+          1.0,
+          0.36,
+          0.06
+        ],
+        "glow": 1.0
+      },
+      "lut": {
+        "data": "luts/1e6bd772f4695db0c4ed2d9553a2931c3bc1ceff2d13fc386e9090d3abd39348.cubedata",
+        "size": 33,
+        "amount": 1.0,
+        "sha256": "1e6bd772f4695db0c4ed2d9553a2931c3bc1ceff2d13fc386e9090d3abd39348"
+      }
+    },
+    {
+      "id": "coldstore",
+      "name": "Coldstore",
+      "family": "cool-negative",
+      "version": 1,
+      "focal": 26,
+      "frame": "none",
+      "halation": {
+        "strength": 0.18,
+        "threshold": 0.84,
+        "softness": 0.12,
+        "tint": [
+          1.0,
+          0.45,
+          0.3
+        ],
+        "radius_pct": 0.012,
+        "scales": [
+          1.0,
+          3.0,
+          9.0
+        ],
+        "weights": [
+          0.5,
+          0.35,
+          0.15
+        ]
+      },
+      "grain": {
+        "amount": 0.048,
+        "size_px1000": 2.9,
+        "mu": 0.45,
+        "sigma": 0.3,
+        "shadow_floor": 0.05,
+        "chroma": 0.36,
+        "octaves": 2
+      },
+      "vignette": {
+        "amount": 0.26,
+        "radius": 0.78,
+        "softness": 0.45,
+        "roundness": 1.0
+      },
+      "optics": {
+        "aberration": 0.0,
+        "softness": 0.0
+      },
+      "leak": {
+        "strength": 0.0,
+        "seed": 0,
+        "tint": [
+          1.0,
+          0.42,
+          0.14
+        ]
+      },
+      "stamp": {
+        "enabled": false,
+        "size_pct": 0.035,
+        "corner": "bottomRight",
+        "tint": [
+          1.0,
+          0.36,
+          0.06
+        ],
+        "glow": 1.0
+      },
+      "lut": {
+        "data": "luts/27b4594cf71e7e2f33adb959a39fef4f3a5acc488ae3a8ae1a505d06d8e7bef4.cubedata",
+        "size": 33,
+        "amount": 1.0,
+        "sha256": "27b4594cf71e7e2f33adb959a39fef4f3a5acc488ae3a8ae1a505d06d8e7bef4"
+      }
+    },
+    {
+      "id": "nightbus",
+      "name": "Nightbus",
+      "family": "cool-negative",
+      "version": 1,
+      "focal": 26,
+      "frame": "none",
+      "halation": {
+        "strength": 0.55,
+        "threshold": 0.68,
+        "softness": 0.12,
+        "tint": [
+          1.0,
+          0.34,
+          0.18
+        ],
+        "radius_pct": 0.018,
+        "scales": [
+          1.0,
+          3.0,
+          9.0
+        ],
+        "weights": [
+          0.5,
+          0.35,
+          0.15
+        ]
+      },
+      "grain": {
+        "amount": 0.06,
+        "size_px1000": 3.4,
+        "mu": 0.38,
+        "sigma": 0.32,
+        "shadow_floor": 0.07,
+        "chroma": 0.4,
+        "octaves": 2
+      },
+      "vignette": {
+        "amount": 0.38,
+        "radius": 0.7,
+        "softness": 0.45,
+        "roundness": 1.0
+      },
+      "optics": {
+        "aberration": 0.0,
+        "softness": 0.0
+      },
+      "leak": {
+        "strength": 0.0,
+        "seed": 0,
+        "tint": [
+          1.0,
+          0.42,
+          0.14
+        ]
+      },
+      "stamp": {
+        "enabled": false,
+        "size_pct": 0.035,
+        "corner": "bottomRight",
+        "tint": [
+          1.0,
+          0.36,
+          0.06
+        ],
+        "glow": 1.0
+      },
+      "lut": {
+        "data": "luts/a482a3a5c681af5c64a0973cafb4cd3d46c3c1d9c7c3adc05e7a9f31889e942a.cubedata",
+        "size": 33,
+        "amount": 1.0,
+        "sha256": "a482a3a5c681af5c64a0973cafb4cd3d46c3c1d9c7c3adc05e7a9f31889e942a"
+      }
+    },
+    {
+      "id": "municipal",
+      "name": "Municipal",
+      "family": "cool-negative",
+      "version": 1,
+      "focal": 26,
+      "frame": "none",
+      "halation": {
+        "strength": 0.15,
+        "threshold": 0.86,
+        "softness": 0.12,
+        "tint": [
+          1.0,
+          0.3,
+          0.12
+        ],
+        "radius_pct": 0.012,
+        "scales": [
+          1.0,
+          3.0,
+          9.0
+        ],
+        "weights": [
+          0.5,
+          0.35,
+          0.15
+        ]
+      },
+      "grain": {
+        "amount": 0.045,
+        "size_px1000": 2.7,
+        "mu": 0.45,
+        "sigma": 0.28,
+        "shadow_floor": 0.05,
+        "chroma": 0.3,
+        "octaves": 2
+      },
+      "vignette": {
+        "amount": 0.2,
+        "radius": 0.78,
+        "softness": 0.45,
+        "roundness": 1.0
+      },
+      "optics": {
+        "aberration": 0.0,
+        "softness": 0.0
+      },
+      "leak": {
+        "strength": 0.0,
+        "seed": 0,
+        "tint": [
+          1.0,
+          0.42,
+          0.14
+        ]
+      },
+      "stamp": {
+        "enabled": false,
+        "size_pct": 0.035,
+        "corner": "bottomRight",
+        "tint": [
+          1.0,
+          0.36,
+          0.06
+        ],
+        "glow": 1.0
+      },
+      "lut": {
+        "data": "luts/322efb5f81b30d840b2a87f164cecf2935e36803e801753ca2876e56a1fef539.cubedata",
+        "size": 33,
+        "amount": 1.0,
+        "sha256": "322efb5f81b30d840b2a87f164cecf2935e36803e801753ca2876e56a1fef539"
+      }
+    },
+    {
+      "id": "postcard",
+      "name": "Postcard",
+      "family": "reversal",
+      "version": 1,
+      "focal": 26,
+      "frame": "none",
+      "halation": {
+        "strength": 0.12,
+        "threshold": 0.88,
+        "softness": 0.12,
+        "tint": [
+          1.0,
+          0.3,
+          0.12
+        ],
+        "radius_pct": 0.008,
+        "scales": [
+          1.0,
+          3.0,
+          9.0
+        ],
+        "weights": [
+          0.5,
+          0.35,
+          0.15
+        ]
+      },
+      "grain": {
+        "amount": 0.015,
+        "size_px1000": 1.5,
+        "mu": 0.45,
+        "sigma": 0.22,
+        "shadow_floor": 0.06,
+        "chroma": 0.3,
+        "octaves": 2
+      },
+      "vignette": {
+        "amount": 0.16,
+        "radius": 0.78,
+        "softness": 0.45,
+        "roundness": 1.0
+      },
+      "optics": {
+        "aberration": 0.0,
+        "softness": 0.0
+      },
+      "leak": {
+        "strength": 0.0,
+        "seed": 0,
+        "tint": [
+          1.0,
+          0.42,
+          0.14
+        ]
+      },
+      "stamp": {
+        "enabled": false,
+        "size_pct": 0.035,
+        "corner": "bottomRight",
+        "tint": [
+          1.0,
+          0.36,
+          0.06
+        ],
+        "glow": 1.0
+      },
+      "lut": {
+        "data": "luts/01cdce521dba7751230823f307fea6a4aee47b9c799af06f49896e9e704919e6.cubedata",
+        "size": 33,
+        "amount": 1.0,
+        "sha256": "01cdce521dba7751230823f307fea6a4aee47b9c799af06f49896e9e704919e6"
+      }
+    },
+    {
+      "id": "rally",
+      "name": "Rally",
+      "family": "reversal",
+      "version": 1,
+      "focal": 26,
+      "frame": "none",
+      "halation": {
+        "strength": 0.2,
+        "threshold": 0.84,
+        "softness": 0.12,
+        "tint": [
+          1.0,
+          0.3,
+          0.12
+        ],
+        "radius_pct": 0.009,
+        "scales": [
+          1.0,
+          3.0,
+          9.0
+        ],
+        "weights": [
+          0.5,
+          0.35,
+          0.15
+        ]
+      },
+      "grain": {
+        "amount": 0.021,
+        "size_px1000": 1.6,
+        "mu": 0.45,
+        "sigma": 0.24,
+        "shadow_floor": 0.08,
+        "chroma": 0.3,
+        "octaves": 2
+      },
+      "vignette": {
+        "amount": 0.24,
+        "radius": 0.78,
+        "softness": 0.45,
+        "roundness": 1.0
+      },
+      "optics": {
+        "aberration": 0.0,
+        "softness": 0.0
+      },
+      "leak": {
+        "strength": 0.0,
+        "seed": 0,
+        "tint": [
+          1.0,
+          0.42,
+          0.14
+        ]
+      },
+      "stamp": {
+        "enabled": false,
+        "size_pct": 0.035,
+        "corner": "bottomRight",
+        "tint": [
+          1.0,
+          0.36,
+          0.06
+        ],
+        "glow": 1.0
+      },
+      "lut": {
+        "data": "luts/196571f94db5eefd7511744042afd3dfd162340fca94bd3a251494309eeb9522.cubedata",
+        "size": 33,
+        "amount": 1.0,
+        "sha256": "196571f94db5eefd7511744042afd3dfd162340fca94bd3a251494309eeb9522"
+      }
+    },
+    {
+      "id": "linen",
+      "name": "Linen",
+      "family": "pastel",
+      "version": 1,
+      "focal": 26,
+      "frame": "none",
+      "halation": {
+        "strength": 0.16,
+        "threshold": 0.8,
+        "softness": 0.12,
+        "tint": [
+          1.0,
+          0.3,
+          0.12
+        ],
+        "radius_pct": 0.013,
+        "scales": [
+          1.0,
+          3.0,
+          9.0
+        ],
+        "weights": [
+          0.5,
+          0.35,
+          0.15
+        ]
+      },
+      "grain": {
+        "amount": 0.03,
+        "size_px1000": 2.0,
+        "mu": 0.45,
+        "sigma": 0.3,
+        "shadow_floor": 0.05,
+        "chroma": 0.3,
+        "octaves": 2
+      },
+      "vignette": {
+        "amount": 0.08,
+        "radius": 0.78,
+        "softness": 0.45,
+        "roundness": 1.0
+      },
+      "optics": {
+        "aberration": 0.0,
+        "softness": 0.0
+      },
+      "leak": {
+        "strength": 0.0,
+        "seed": 0,
+        "tint": [
+          1.0,
+          0.42,
+          0.14
+        ]
+      },
+      "stamp": {
+        "enabled": false,
+        "size_pct": 0.035,
+        "corner": "bottomRight",
+        "tint": [
+          1.0,
+          0.36,
+          0.06
+        ],
+        "glow": 1.0
+      },
+      "lut": {
+        "data": "luts/fe9ec93e6c7282d61b1545dcff2fe391ae108b3a7202a53ed4e1a7c689cc42f8.cubedata",
+        "size": 33,
+        "amount": 1.0,
+        "sha256": "fe9ec93e6c7282d61b1545dcff2fe391ae108b3a7202a53ed4e1a7c689cc42f8"
+      }
+    },
+    {
+      "id": "powder",
+      "name": "Powder",
+      "family": "pastel",
+      "version": 1,
+      "focal": 26,
+      "frame": "none",
+      "halation": {
+        "strength": 0.14,
+        "threshold": 0.8,
+        "softness": 0.12,
+        "tint": [
+          1.0,
+          0.3,
+          0.12
+        ],
+        "radius_pct": 0.012,
+        "scales": [
+          1.0,
+          3.0,
+          9.0
+        ],
+        "weights": [
+          0.5,
+          0.35,
+          0.15
+        ]
+      },
+      "grain": {
+        "amount": 0.027,
+        "size_px1000": 2.1,
+        "mu": 0.45,
+        "sigma": 0.32,
+        "shadow_floor": 0.05,
+        "chroma": 0.3,
+        "octaves": 2
+      },
+      "vignette": {
+        "amount": 0.06,
+        "radius": 0.78,
+        "softness": 0.45,
+        "roundness": 1.0
+      },
+      "optics": {
+        "aberration": 0.0,
+        "softness": 0.0
+      },
+      "leak": {
+        "strength": 0.0,
+        "seed": 0,
+        "tint": [
+          1.0,
+          0.42,
+          0.14
+        ]
+      },
+      "stamp": {
+        "enabled": false,
+        "size_pct": 0.035,
+        "corner": "bottomRight",
+        "tint": [
+          1.0,
+          0.36,
+          0.06
+        ],
+        "glow": 1.0
+      },
+      "lut": {
+        "data": "luts/9176122181fdc81a7bfaa3640fadbc19ce3d53aebc838948facc95802802a771.cubedata",
+        "size": 33,
+        "amount": 1.0,
+        "sha256": "9176122181fdc81a7bfaa3640fadbc19ce3d53aebc838948facc95802802a771"
+      }
+    },
+    {
+      "id": "graphite",
+      "name": "Graphite",
+      "family": "mono",
+      "version": 1,
+      "focal": 26,
+      "frame": "none",
+      "halation": {
+        "strength": 0.18,
+        "threshold": 0.82,
+        "softness": 0.12,
+        "tint": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "radius_pct": 0.012,
+        "scales": [
+          1.0,
+          3.0,
+          9.0
+        ],
+        "weights": [
+          0.5,
+          0.35,
+          0.15
+        ]
+      },
+      "grain": {
+        "amount": 0.054,
+        "size_px1000": 2.8,
+        "mu": 0.45,
+        "sigma": 0.28,
+        "shadow_floor": 0.06,
+        "chroma": 0.0,
+        "octaves": 2
+      },
+      "vignette": {
+        "amount": 0.24,
+        "radius": 0.78,
+        "softness": 0.45,
+        "roundness": 1.0
+      },
+      "optics": {
+        "aberration": 0.0,
+        "softness": 0.0
+      },
+      "leak": {
+        "strength": 0.0,
+        "seed": 0,
+        "tint": [
+          1.0,
+          0.42,
+          0.14
+        ]
+      },
+      "stamp": {
+        "enabled": false,
+        "size_pct": 0.035,
+        "corner": "bottomRight",
+        "tint": [
+          1.0,
+          0.36,
+          0.06
+        ],
+        "glow": 1.0
+      },
+      "lut": {
+        "data": "luts/8f531ea5f4d6500b868f34c00eab741fdc95ee89cadfb27bf8721254bc06acaa.cubedata",
+        "size": 33,
+        "amount": 1.0,
+        "sha256": "8f531ea5f4d6500b868f34c00eab741fdc95ee89cadfb27bf8721254bc06acaa"
+      }
+    },
+    {
+      "id": "selenium",
+      "name": "Selenium",
+      "family": "mono",
+      "version": 1,
+      "focal": 26,
+      "frame": "none",
+      "halation": {
+        "strength": 0.15,
+        "threshold": 0.84,
+        "softness": 0.12,
+        "tint": [
+          0.8,
+          0.9,
+          1.0
+        ],
+        "radius_pct": 0.012,
+        "scales": [
+          1.0,
+          3.0,
+          9.0
+        ],
+        "weights": [
+          0.5,
+          0.35,
+          0.15
+        ]
+      },
+      "grain": {
+        "amount": 0.048,
+        "size_px1000": 2.5,
+        "mu": 0.45,
+        "sigma": 0.28,
+        "shadow_floor": 0.05,
+        "chroma": 0.0,
+        "octaves": 2
+      },
+      "vignette": {
+        "amount": 0.28,
+        "radius": 0.78,
+        "softness": 0.45,
+        "roundness": 1.0
+      },
+      "optics": {
+        "aberration": 0.0,
+        "softness": 0.0
+      },
+      "leak": {
+        "strength": 0.0,
+        "seed": 0,
+        "tint": [
+          1.0,
+          0.42,
+          0.14
+        ]
+      },
+      "stamp": {
+        "enabled": false,
+        "size_pct": 0.035,
+        "corner": "bottomRight",
+        "tint": [
+          1.0,
+          0.36,
+          0.06
+        ],
+        "glow": 1.0
+      },
+      "lut": {
+        "data": "luts/77924952c7e0ab6edbd6806b47af2314c88954597702994b5f8a3c71326a0f5a.cubedata",
+        "size": 33,
+        "amount": 1.0,
+        "sha256": "77924952c7e0ab6edbd6806b47af2314c88954597702994b5f8a3c71326a0f5a"
+      }
+    },
+    {
+      "id": "foxglove",
+      "name": "Foxglove",
+      "family": "mono",
+      "version": 1,
+      "focal": 26,
+      "frame": "none",
+      "halation": {
+        "strength": 0.3,
+        "threshold": 0.76,
+        "softness": 0.12,
+        "tint": [
+          1.0,
+          0.3,
+          0.12
+        ],
+        "radius_pct": 0.014,
+        "scales": [
+          1.0,
+          3.0,
+          9.0
+        ],
+        "weights": [
+          0.5,
+          0.35,
+          0.15
+        ]
+      },
+      "grain": {
+        "amount": 0.051,
+        "size_px1000": 3.0,
+        "mu": 0.45,
+        "sigma": 0.28,
+        "shadow_floor": 0.07,
+        "chroma": 0.0,
+        "octaves": 2
+      },
+      "vignette": {
+        "amount": 0.34,
+        "radius": 0.72,
+        "softness": 0.45,
+        "roundness": 1.0
+      },
+      "optics": {
+        "aberration": 0.0,
+        "softness": 0.0
+      },
+      "leak": {
+        "strength": 0.0,
+        "seed": 0,
+        "tint": [
+          1.0,
+          0.42,
+          0.14
+        ]
+      },
+      "stamp": {
+        "enabled": false,
+        "size_pct": 0.035,
+        "corner": "bottomRight",
+        "tint": [
+          1.0,
+          0.36,
+          0.06
+        ],
+        "glow": 1.0
+      },
+      "lut": {
+        "data": "luts/bc5387e1d1e29aadb829b0037f645516727d2494988a0175419a36c6dafdd4b6.cubedata",
+        "size": 33,
+        "amount": 1.0,
+        "sha256": "bc5387e1d1e29aadb829b0037f645516727d2494988a0175419a36c6dafdd4b6"
+      }
+    },
+    {
+      "id": "flashbulb",
+      "name": "Flashbulb",
+      "family": "camera",
+      "version": 1,
+      "focal": 32,
+      "frame": "none",
+      "halation": {
+        "strength": 0.65,
+        "threshold": 0.66,
+        "softness": 0.12,
+        "tint": [
+          1.0,
+          0.3,
+          0.12
+        ],
+        "radius_pct": 0.02,
+        "scales": [
+          1.0,
+          3.0,
+          9.0
+        ],
+        "weights": [
+          0.42,
+          0.36,
+          0.22
+        ]
+      },
+      "grain": {
+        "amount": 0.06,
+        "size_px1000": 3.2,
+        "mu": 0.42,
+        "sigma": 0.28,
+        "shadow_floor": 0.06,
+        "chroma": 0.3,
+        "octaves": 2
+      },
+      "vignette": {
+        "amount": 0.52,
+        "radius": 0.62,
+        "softness": 0.35,
+        "roundness": 1.0
+      },
+      "optics": {
+        "aberration": 0.003,
+        "softness": 0.55
+      },
+      "leak": {
+        "strength": 0.38,
+        "seed": 4417,
+        "tint": [
+          1.0,
+          0.42,
+          0.14
+        ]
+      },
+      "stamp": {
+        "enabled": true,
+        "size_pct": 0.035,
+        "corner": "bottomRight",
+        "tint": [
+          1.0,
+          0.36,
+          0.06
+        ],
+        "glow": 1.0
+      },
+      "lut": {
+        "data": "luts/df6c6dccb325c40021e324a829fba41b88c6de712f319a192f01e7dc020d06a4.cubedata",
+        "size": 33,
+        "amount": 1.0,
+        "sha256": "df6c6dccb325c40021e324a829fba41b88c6de712f319a192f01e7dc020d06a4"
+      }
+    },
+    {
+      "id": "compact",
+      "name": "Compact",
+      "family": "camera",
+      "version": 1,
+      "focal": 38,
+      "frame": "none",
+      "halation": {
+        "strength": 0.1,
+        "threshold": 0.9,
+        "softness": 0.12,
+        "tint": [
+          1.0,
+          0.3,
+          0.12
+        ],
+        "radius_pct": 0.006,
+        "scales": [
+          1.0,
+          3.0,
+          9.0
+        ],
+        "weights": [
+          0.5,
+          0.35,
+          0.15
+        ]
+      },
+      "grain": {
+        "amount": 0.018,
+        "size_px1000": 1.4,
+        "mu": 0.45,
+        "sigma": 0.2,
+        "shadow_floor": 0.05,
+        "chroma": 0.5,
+        "octaves": 2
+      },
+      "vignette": {
+        "amount": 0.14,
+        "radius": 0.84,
+        "softness": 0.45,
+        "roundness": 1.0
+      },
+      "optics": {
+        "aberration": 0.0016,
+        "softness": 0.22
+      },
+      "leak": {
+        "strength": 0.0,
+        "seed": 0,
+        "tint": [
+          1.0,
+          0.42,
+          0.14
+        ]
+      },
+      "stamp": {
+        "enabled": true,
+        "size_pct": 0.03,
+        "corner": "bottomRight",
+        "tint": [
+          1.0,
+          0.36,
+          0.06
+        ],
+        "glow": 1.0
+      },
+      "lut": {
+        "data": "luts/d1c051d945dd52af85b7c4363760dc28c20878290891260094339fef94325c6e.cubedata",
+        "size": 33,
+        "amount": 1.0,
+        "sha256": "d1c051d945dd52af85b7c4363760dc28c20878290891260094339fef94325c6e"
+      }
+    },
+    {
+      "id": "frame135",
+      "name": "Frame 135",
+      "family": "camera",
+      "version": 1,
+      "focal": 35,
+      "frame": "sprocket",
+      "halation": {
+        "strength": 0.38,
+        "threshold": 0.76,
+        "softness": 0.12,
+        "tint": [
+          1.0,
+          0.3,
+          0.12
+        ],
+        "radius_pct": 0.013,
+        "scales": [
+          1.0,
+          3.0,
+          9.0
+        ],
+        "weights": [
+          0.5,
+          0.35,
+          0.15
+        ]
+      },
+      "grain": {
+        "amount": 0.042,
+        "size_px1000": 2.7,
+        "mu": 0.45,
+        "sigma": 0.28,
+        "shadow_floor": 0.05,
+        "chroma": 0.3,
+        "octaves": 2
+      },
+      "vignette": {
+        "amount": 0.18,
+        "radius": 0.78,
+        "softness": 0.45,
+        "roundness": 1.0
+      },
+      "optics": {
+        "aberration": 0.0012,
+        "softness": 0.2
+      },
+      "leak": {
+        "strength": 0.2,
+        "seed": 1350,
+        "tint": [
+          1.0,
+          0.42,
+          0.14
+        ]
+      },
+      "stamp": {
+        "enabled": false,
+        "size_pct": 0.035,
+        "corner": "bottomRight",
+        "tint": [
+          1.0,
+          0.36,
+          0.06
+        ],
+        "glow": 1.0
+      },
+      "lut": {
+        "data": "luts/3305b1631bf8a217299f1ed2f986f0ec0e63bc2e5be257cbeb76f069ca8e5579.cubedata",
+        "size": 33,
+        "amount": 1.0,
+        "sha256": "3305b1631bf8a217299f1ed2f986f0ec0e63bc2e5be257cbeb76f069ca8e5579"
+      }
+    },
+    {
+      "id": "instant",
+      "name": "Instant",
+      "family": "camera",
+      "version": 1,
+      "focal": 41,
+      "frame": "instant",
+      "halation": {
+        "strength": 0.3,
+        "threshold": 0.74,
+        "softness": 0.12,
+        "tint": [
+          1.0,
+          0.3,
+          0.12
+        ],
+        "radius_pct": 0.016,
+        "scales": [
+          1.0,
+          3.0,
+          9.0
+        ],
+        "weights": [
+          0.5,
+          0.35,
+          0.15
+        ]
+      },
+      "grain": {
+        "amount": 0.03,
+        "size_px1000": 2.3,
+        "mu": 0.45,
+        "sigma": 0.32,
+        "shadow_floor": 0.05,
+        "chroma": 0.3,
+        "octaves": 2
+      },
+      "vignette": {
+        "amount": 0.22,
+        "radius": 0.74,
+        "softness": 0.45,
+        "roundness": 1.0
+      },
+      "optics": {
+        "aberration": 0.0022,
+        "softness": 0.45
+      },
+      "leak": {
+        "strength": 0.26,
+        "seed": 6001,
+        "tint": [
+          1.0,
+          0.42,
+          0.14
+        ]
+      },
+      "stamp": {
+        "enabled": false,
+        "size_pct": 0.035,
+        "corner": "bottomRight",
+        "tint": [
+          1.0,
+          0.36,
+          0.06
+        ],
+        "glow": 1.0
+      },
+      "lut": {
+        "data": "luts/977a8d23a8aafc0b19ac233677106415b605efb3d94ed5dbbc612c374b089daf.cubedata",
+        "size": 33,
+        "amount": 1.0,
+        "sha256": "977a8d23a8aafc0b19ac233677106415b605efb3d94ed5dbbc612c374b089daf"
+      }
+    }
+  ]
+}

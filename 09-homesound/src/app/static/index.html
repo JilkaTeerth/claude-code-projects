@@ -1,0 +1,388 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>homesound — multi-speaker sync</title>
+<link rel="stylesheet" href="/static/style.css">
+
+<!-- ============================ ENGINE OFFLINE OVERLAY ============================ -->
+<div class="overlay" id="offline" hidden>
+  <div class="overlay-card">
+    <svg class="overlay-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M2 2l20 20"/><path d="M8.5 8.5a5 5 0 0 0-1.4 2.4"/><path d="M16.9 16.9A5 5 0 0 1 12 19"/>
+      <path d="M12 5v3"/><rect x="4" y="9" width="16" height="11" rx="2"/>
+    </svg>
+    <h2>Engine not running</h2>
+    <p>Can't reach the homesound audio engine on <code>127.0.0.1:8777</code>. Start the server, then reconnect.</p>
+    <pre class="overlay-cmd">python3 -m app.server</pre>
+    <button class="btn btn-accent" id="offline-retry" type="button">Retry connection</button>
+    <div class="overlay-status" id="offline-status">Retrying automatically…</div>
+  </div>
+</div>
+
+<!-- ================================== HEADER ==================================== -->
+<header class="topbar">
+  <div class="brand">
+    <svg class="brand-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M3 12v-1a9 9 0 0 1 18 0v1"/>
+      <rect x="2" y="12" width="5" height="8" rx="1.5"/>
+      <rect x="17" y="12" width="5" height="8" rx="1.5"/>
+    </svg>
+    <span class="brand-name">homesound</span>
+    <span class="brand-sub">multi&#8209;speaker sync</span>
+  </div>
+
+  <div class="engine">
+    <span class="dot" id="engine-dot" data-state="down" aria-hidden="true"></span>
+    <span class="engine-label" id="engine-label" role="status">connecting</span>
+    <span class="engine-rule"></span>
+    <span class="engine-spec"><b class="num" id="engine-sr">—</b> Hz</span>
+    <span class="engine-spec"><b class="num" id="engine-bs">—</b> buf</span>
+    <span class="engine-spec engine-lat"><b class="num" id="engine-ms">—</b> ms</span>
+  </div>
+
+  <div class="master">
+    <span class="master-label" id="master-label">MASTER</span>
+    <div class="slider slider-sm" id="master-wrap">
+      <div class="slider-groove"><div class="slider-fill" data-ref="masterFill"></div><div class="slider-detent"></div></div>
+      <input type="range" id="master-gain" class="slider-input" min="0" max="2" step="0.01" value="1"
+             aria-labelledby="master-label" aria-valuetext="0.0 dB">
+    </div>
+    <output class="num master-db" id="master-db" for="master-gain">0.0 dB</output>
+    <button class="iconbtn" id="master-mute" type="button" aria-label="Mute master output" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/>
+      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="alt">
+        <path d="M11 5 6 9H2v6h4l5 4z"/><path d="M22 9l-6 6"/><path d="M16 9l6 6"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<!-- ================================= TRANSPORT ================================== -->
+<section class="transport" aria-label="Transport">
+  <div class="tp-buttons">
+    <button class="tbtn tbtn-play" id="tp-play" type="button" aria-label="Play">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>
+    </button>
+    <button class="tbtn" id="tp-pause" type="button" aria-label="Pause">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+    </button>
+    <button class="tbtn" id="tp-stop" type="button" aria-label="Stop">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+    </button>
+    <span class="tp-state" id="tp-state">STOPPED</span>
+  </div>
+
+  <div class="tp-scrub">
+    <output class="num tc tc-pos" id="tp-pos" for="tp-seek">0:00.000</output>
+    <div class="slider slider-scrub" id="scrub-wrap">
+      <div class="slider-groove"><div class="slider-fill" data-ref="scrubFill"></div></div>
+      <input type="range" id="tp-seek" class="slider-input" min="0" max="1" step="0.001" value="0"
+             aria-label="Playback position" aria-valuetext="0:00.000">
+    </div>
+    <output class="num tc tc-dur" id="tp-dur">0:00.000</output>
+  </div>
+
+  <div class="tp-source">
+    <div class="src-now">
+      <span class="src-kind" id="src-kind">NO SOURCE</span>
+      <span class="src-name" id="src-name" title="">— nothing loaded —</span>
+    </div>
+    <div class="seg" role="group" aria-label="Audio source">
+      <button class="seg-btn" id="src-file" type="button" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V6l10-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="19" cy="16" r="3"/></svg>
+        Audio file
+      </button>
+      <button class="seg-btn" id="src-system" type="button" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+        System audio
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ================================= WORKSPACE ================================== -->
+<main class="workspace">
+
+  <!-- ------------------------------ SPEAKER RACK ------------------------------ -->
+  <section class="panel panel-rack" aria-labelledby="rack-title">
+    <div class="panel-head">
+      <span class="led" aria-hidden="true"></span>
+      <h2 class="panel-title" id="rack-title">Speaker rack</h2>
+      <span class="panel-count"><b class="num" id="rack-count">0</b> in group</span>
+      <span class="grow"></span>
+      <span class="panel-hint">latency trim &minus;2000 … +2000 ms</span>
+    </div>
+
+    <div class="rack" id="rack"></div>
+
+    <div class="empty" id="rack-empty" hidden>
+      <svg class="empty-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="14" r="4"/><circle cx="12" cy="6" r="1.2"/>
+      </svg>
+      <h3>The rack is empty</h3>
+      <p>Add a speaker to start building your sync group. Each one gets its own latency trim so mismatched hardware lines up to the millisecond.</p>
+      <button class="btn btn-accent" id="empty-add" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+        Add a speaker
+      </button>
+    </div>
+  </section>
+
+  <!-- -------------------------------- SIDEBAR --------------------------------- -->
+  <aside class="sidebar">
+    <section class="panel" aria-labelledby="avail-title" id="avail-panel">
+      <div class="panel-head">
+        <span class="led led-dim" aria-hidden="true"></span>
+        <h2 class="panel-title" id="avail-title">Available outputs</h2>
+        <span class="grow"></span>
+        <button class="iconbtn iconbtn-sm" id="rescan" type="button" aria-label="Re-scan audio devices">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 4v5h-5"/></svg>
+        </button>
+      </div>
+      <div class="list" id="avail"></div>
+      <p class="list-empty" id="avail-empty" hidden>Every detected output is already in the group.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="bt-title">
+      <div class="panel-head">
+        <span class="led led-bt" aria-hidden="true"></span>
+        <h2 class="panel-title" id="bt-title">Bluetooth</h2>
+        <span class="grow"></span>
+        <span class="panel-hint">paired</span>
+      </div>
+      <div class="list" id="bt"></div>
+      <p class="list-empty" id="bt-empty" hidden>No paired Bluetooth audio devices found.</p>
+    </section>
+  </aside>
+</main>
+
+<!-- ================================== TOASTS ==================================== -->
+<div class="toasts" id="toasts" role="region" aria-label="Notifications" aria-live="polite"></div>
+
+<!-- ============================== LIBRARY MODAL ================================= -->
+<div class="modal-backdrop" id="modal-library" hidden>
+  <div class="modal modal-lib" role="dialog" aria-modal="true" aria-labelledby="lib-title">
+    <div class="modal-head">
+      <h2 id="lib-title">Audio library</h2>
+      <button class="iconbtn iconbtn-sm" data-close="modal-library" type="button" aria-label="Close library">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="list list-lib" id="lib-list"></div>
+      <p class="list-empty" id="lib-empty" hidden>No audio files found in the library folder.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================ CALIBRATION WIZARD ============================== -->
+<div class="modal-backdrop" id="modal-cal" hidden>
+  <div class="modal modal-cal" role="dialog" aria-modal="true" aria-labelledby="cal-title">
+    <div class="modal-head">
+      <span class="led led-cal" id="cal-led" aria-hidden="true"></span>
+      <h2 id="cal-title">Calibrate</h2>
+      <span class="modal-step num" id="cal-step">1 / 2</span>
+      <button class="iconbtn iconbtn-sm" data-close="modal-cal" type="button" aria-label="Close calibration">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- STEP 1 — pick a speaker -->
+    <div class="modal-body" id="cal-pick">
+      <p class="cal-lede">Pick the speaker to calibrate. Everything else stays silent so you only hear the one you're aligning.</p>
+      <div class="list list-pick" id="cal-pick-list"></div>
+      <p class="list-empty" id="cal-pick-empty" hidden>Add a speaker to the group first.</p>
+    </div>
+
+    <!-- STEP 2 — tap along -->
+    <div class="modal-body" id="cal-run" hidden>
+      <div class="cal-target">
+        <span class="cal-target-label">CALIBRATING</span>
+        <span class="cal-target-name" id="cal-name">—</span>
+        <span class="cal-live" id="cal-live">LIVE</span>
+      </div>
+
+      <p class="cal-instruction">Tap <kbd>SPACE</kbd> in time with the click you hear.</p>
+      <p class="cal-sub">Keep tapping. Ten or more taps and the offset settles.</p>
+
+      <div class="spacebar" id="cal-spacebar" role="button" tabindex="0" aria-label="Tap in time with the click">
+        <span>SPACE</span>
+      </div>
+
+      <div class="cal-stats">
+        <div class="stat">
+          <span class="stat-label">TAPS</span>
+          <b class="num stat-val" id="cal-taps">0</b>
+        </div>
+        <div class="stat stat-hero">
+          <span class="stat-label">DERIVED TRIM</span>
+          <b class="num stat-val" id="cal-trim">0<span class="u">ms</span></b>
+        </div>
+        <div class="stat">
+          <span class="stat-label">TOTAL DELAY</span>
+          <b class="num stat-val" id="cal-total">0<span class="u">ms</span></b>
+        </div>
+      </div>
+
+      <div class="cal-conv">
+        <div class="cal-conv-head">
+          <span>CONVERGENCE</span>
+          <span class="num" id="cal-spread">—</span>
+        </div>
+        <div class="cal-conv-track" id="cal-conv-track"></div>
+      </div>
+
+      <p class="cal-note" id="cal-note">Accept writes the derived trim to the speaker. Cancel restores the value it had before you started.</p>
+    </div>
+
+    <div class="modal-foot" id="cal-foot" hidden>
+      <button class="btn" id="cal-cancel" type="button">Cancel</button>
+      <button class="btn btn-accent" id="cal-accept" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+        Accept trim
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================ TEMPLATES =================================== -->
+<template id="tpl-speaker">
+  <article class="sp" tabindex="-1">
+    <div class="sp-strip" data-ref="strip" aria-hidden="true"></div>
+
+    <div class="sp-main">
+      <div class="sp-head">
+        <span class="sp-kind" data-ref="kindIco" aria-hidden="true"></span>
+        <div class="sp-id">
+          <span class="sp-name" data-ref="name">Speaker</span>
+          <span class="sp-meta"><span data-ref="kindText">bluetooth</span> · <span class="num" data-ref="ch">2</span> ch · <span class="num sp-devid" data-ref="devid"></span></span>
+        </div>
+
+        <div class="sp-meterwrap">
+          <div class="meter" data-ref="meter" role="meter" aria-label="Output level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div class="meter-mask" data-ref="meterMask"></div>
+            <div class="meter-hold" data-ref="meterHold"></div>
+            <div class="meter-grid"></div>
+          </div>
+          <span class="num meter-num" data-ref="peakNum">-inf</span>
+        </div>
+
+        <div class="sp-headbtns">
+          <button class="btn btn-ghost btn-cal" data-ref="calBtn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3"/><path d="M12 19v3"/><path d="M2 12h3"/><path d="M19 12h3"/></svg>
+            Calibrate
+          </button>
+          <button class="iconbtn iconbtn-sm iconbtn-danger" data-ref="removeBtn" type="button" aria-label="Remove from group">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="sp-body">
+        <!-- HERO: latency trim -->
+        <div class="lat">
+          <div class="lat-head">
+            <span class="lat-label">LATENCY TRIM</span>
+            <button class="lat-value num" data-ref="trimVal" type="button" title="Click to reset trim to 0 ms" aria-label="Latency trim value, click to reset to zero">
+              <span data-ref="trimNum">0</span><span class="u">ms</span>
+            </button>
+          </div>
+          <div class="lat-row">
+            <button class="nudge" data-ref="nudgeDown" type="button" aria-label="Decrease latency trim by 10 milliseconds">&minus;10</button>
+            <div class="slider slider-lat" data-ref="latWrap">
+              <div class="slider-groove">
+                <div class="slider-center"></div>
+                <div class="slider-fill slider-fill-bi" data-ref="trimFill"></div>
+              </div>
+              <input type="range" class="slider-input" data-ref="trim" min="-2000" max="2000" step="1" value="0"
+                     aria-label="Latency trim in milliseconds" aria-valuetext="0 ms">
+              <div class="lat-ticks" aria-hidden="true"><span>&minus;500</span><span>&minus;250</span><span>0</span><span>+250</span><span>+500</span></div>
+            </div>
+            <button class="nudge" data-ref="nudgeUp" type="button" aria-label="Increase latency trim by 10 milliseconds">+10</button>
+          </div>
+          <div class="lat-sub">
+            <span class="lat-sub-item">AUTO <b class="num" data-ref="autoMs">0.0</b><span class="u">ms</span></span>
+            <span class="lat-sub-sep" aria-hidden="true"></span>
+            <span class="lat-sub-item lat-sub-total">APPLIED <b class="num" data-ref="totalMs">0.0</b><span class="u">ms</span></span>
+          </div>
+        </div>
+
+        <!-- gain + mute -->
+        <div class="sp-gain">
+          <div class="lat-head">
+            <span class="lat-label">GAIN</span>
+            <button class="lat-value lat-value-sm num" data-ref="gainVal" type="button" title="Click to reset to unity" aria-label="Gain value, click to reset to unity">0.0<span class="u">dB</span></button>
+          </div>
+          <div class="sp-gain-row">
+            <div class="slider slider-gain" data-ref="gainWrap">
+              <div class="slider-groove"><div class="slider-fill" data-ref="gainFill"></div><div class="slider-detent"></div></div>
+              <input type="range" class="slider-input" data-ref="gain" min="0" max="2" step="0.01" value="1"
+                     aria-label="Speaker gain" aria-valuetext="0.0 dB">
+            </div>
+            <button class="mutebtn" data-ref="muteBtn" type="button" aria-pressed="false" aria-label="Mute speaker">M</button>
+          </div>
+        </div>
+      </div>
+
+      <p class="sp-error" data-ref="error" role="alert" hidden></p>
+    </div>
+  </article>
+</template>
+
+<template id="tpl-avail">
+  <div class="row">
+    <span class="row-ico" data-ref="ico" aria-hidden="true"></span>
+    <div class="row-id">
+      <span class="row-name" data-ref="name">Device</span>
+      <span class="row-meta"><span data-ref="kind">other</span> · <span class="num" data-ref="ch">2</span> ch</span>
+    </div>
+    <button class="btn btn-sm btn-accent" data-ref="add" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+      Add
+    </button>
+  </div>
+</template>
+
+<template id="tpl-bt">
+  <div class="row row-bt">
+    <span class="row-ico" data-ref="ico" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 7 10 10-5 5V2l5 5L7 17"/></svg>
+    </span>
+    <div class="row-id">
+      <span class="row-name" data-ref="name">Device</span>
+      <span class="row-meta num" data-ref="addr">00-00-00</span>
+    </div>
+    <button class="btn btn-sm" data-ref="toggle" type="button">
+      <span class="spinner" data-ref="spin" aria-hidden="true" hidden></span>
+      <span data-ref="toggleText">Connect</span>
+    </button>
+  </div>
+</template>
+
+<template id="tpl-lib">
+  <button class="row row-lib" type="button">
+    <span class="row-ico" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V6l10-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="19" cy="16" r="3"/></svg>
+    </span>
+    <div class="row-id">
+      <span class="row-name" data-ref="name">file.wav</span>
+      <span class="row-meta" data-ref="path">/path</span>
+    </div>
+    <span class="num row-dur" data-ref="dur">—</span>
+  </button>
+</template>
+
+<template id="tpl-pick">
+  <button class="row row-pick" type="button">
+    <span class="row-ico" data-ref="ico" aria-hidden="true"></span>
+    <div class="row-id">
+      <span class="row-name" data-ref="name">Speaker</span>
+      <span class="row-meta">current trim <b class="num" data-ref="trim">0</b> ms</span>
+    </div>
+    <svg class="row-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+  </button>
+</template>
+
+<script src="/static/app.js"></script>

@@ -1,0 +1,17 @@
+{
+ "v2": "P",
+ "3b1b": "Q",
+ "v3": "R",
+ "v1": "S",
+ "v3.1": "T",
+ "heldout_answer_sets": {
+  "answers-1": "v3.1 (T)",
+  "answers-2": "3b1b (Q)",
+  "answers-3": "v1 (S)"
+ },
+ "v3.2": "U",
+ "quizc_answer_sets": {
+  "answers-A": "v3.2 (U)",
+  "answers-B": "3b1b (Q)"
+ }
+}

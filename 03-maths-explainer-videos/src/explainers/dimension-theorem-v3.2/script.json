@@ -1,0 +1,152 @@
+{
+ "title": "5.3 Dimension Theorem (v3.2): Every Pancake Has a Stick",
+ "voice": "af_heart",
+ "speed": 0.96,
+ "jargon": [
+  "kernel",
+  "range",
+  "dimension",
+  "transformation",
+  "matrix",
+  "vector",
+  "domain",
+  "rank",
+  "pivot",
+  "span",
+  "linear",
+  "basis"
+ ],
+ "deliver": "~/Desktop/F&M Notes/MAT 230/Study Guides/5.3 Dimension Theorem (video).mp4",
+ "beats": [
+  {
+   "id": "hook",
+   "tags": [
+    "hook"
+   ],
+   "say": "Okay. [pause] Your roommate built a machine. [beat] The Pancake Three Thousand. [pause] Burger goes in... [beat] burger pancake comes out. [pause] Basketball goes in... sad orange circle. [pause] Then he puts in his phone. [long] Now he owns a very expensive coaster.",
+   "see": "Cartoon press slams a burger into a pancake with googly eyes. A basketball becomes a flat orange disk. A phone becomes a cracked coaster and a coffee cup lands on it."
+  },
+  {
+   "id": "question",
+   "tags": [
+    "hook"
+   ],
+   "say": "So I hand you a pancake. [pause] Which burger made this? [long] You can't tell. [beat] A tiny burger, a giant tower burger, a burger with extra pickles... same pancake. [pause] The machine forgets something. But what?",
+   "see": "One pancake in the middle. Three very different burgers drop in one after another. Each lands as the identical pancake. A big question mark pops over the press."
+  },
+  {
+   "id": "sticks",
+   "tags": [
+    "hook"
+   ],
+   "say": "Here's the trick. [pause] Think of the burger as skinny vertical sticks, like spaghetti standing up. [pause] The press squishes each whole stick into one single dot. [pause] So the pancake is a map of sticks. Every dot was a stick.",
+   "see": "The burger goes see-through. Red vertical sticks fill it. The press descends slowly. Each red stick shrinks into one yellow dot. One stick is highlighted and its dot pulses. For a split second one stick tilts, then snaps back upright, a hint that sticks don't have to stand straight."
+  },
+  {
+   "id": "count",
+   "tags": [
+    "hook"
+   ],
+   "say": "Now we can count. [pause] How many directions to point at a stick? [beat] Two. Left right, front back. That's the pancake. [pause] Room inside one stick? [beat] One. Up down. [pause] Two plus one is three. Not luck. The burger is literally made of sticks.",
+   "see": "A yellow grid spreads over the pancake. Its label pops: 'which stick: 2'. One red stick slides out. Its label pops: 'inside a stick: 1'. They slam together into 2 + 1 = 3 beside the whole burger."
+  },
+  {
+   "id": "names",
+   "tags": [
+    "reveal"
+   ],
+   "say": "Mathematicians have names for all this. [long] The press is a linear transformation, L. Everything you can feed it is the domain, V. [pause] The stick that lands exactly on zero is the kernel. Some books call it the null space: everything that becomes null. [beat] And every other stick is that same kernel, slid over. Parallel copies. [pause] The pancake, everything that comes out, is the range. [pause] That's Theorem 5.10, the Dimension Theorem: the dimension of the kernel, plus the dimension of the range, equals the dimension of V. Inside a stick, plus how many sticks.",
+   "see": "The press gets a tag L. The input tray gets the label V, the domain. The middle red stick glows and becomes ker(L). Copies of it slide sideways, staying parallel. The pancake becomes range(L). The boxed theorem appears with 'inside a stick' and 'how many sticks' under its terms."
+  },
+  {
+   "id": "subspaces",
+   "tags": [],
+   "say": "Two quick facts first, Theorem 5.8. [pause] The kernel is a subspace of V, the inputs. [beat] The range is a subspace of W, the outputs. [pause] So the range can't be bigger than W. [beat] Squash six dimensions into four, and at least two get crushed.",
+   "see": "Two rooms side by side: V on the left with the red kernel inside it, W on the right with the yellow range inside it. A gauge on W shows the range can only fill up to dim W. Then a big R6 block squeezes into an R4 box, and a red counter reads 'crushed: at least 2'."
+  },
+  {
+   "id": "trap",
+   "tags": [],
+   "say": "Careful, though. [pause] A real press squishes straight down. Most transformations don't. [beat] The sticks can lean. [pause] And other directions get stretched and turned. [beat] What's conserved is the count, not any one direction.",
+   "see": "The vertical sticks tilt to a steep slant. The pancake stays flat. A sideways arrow goes in. It comes out longer and rotated. A banner drops: the count is conserved, not the directions."
+  },
+  {
+   "id": "plane",
+   "tags": [],
+   "say": "Let's watch a real one. [pause] This matrix, one, minus one, two, minus two, is a machine for the flat plane. [pause] First, slice the plane into its sticks. [beat] They're these slanted red lines. [pause] Now press. [long] Every red line collapses into one yellow dot. And all the dots line up on a single line. That's the range.",
+   "see": "A dark grid. The matrix in the corner. The plane is sliced into parallel red lines along the direction 1,1. The transformation plays: each red line shrinks to a single yellow dot, and the dots sit on the line through 1,2. The red and yellow lines are clearly NOT perpendicular."
+  },
+  {
+   "id": "plane2",
+   "tags": [],
+   "say": "Check the count. [pause] Kernel: the line through one, one. Dimension one. [beat] Range: the line through one, two. Dimension one. [pause] One plus one is two. [beat] And they're not at right angles. They don't have to be.",
+   "see": "The red line glows with its label ker(L) = span{[1,1]}. The yellow line glows with range(L) = span{[1,2]}. An angle arc appears between them, clearly not 90 degrees. The tally 1 + 1 = 2 drops in."
+  },
+  {
+   "id": "space",
+   "tags": [],
+   "say": "In 3D, same story. [pause] Squash space onto a plane: sticks are lines. Two plus one. [pause] Squash it onto a line: the sticks are whole sheets. [beat] One plus two. The count never breaks.",
+   "see": "A 3D grid of space tilts into view. It collapses onto a yellow plane. Red lines shrink to dots: 2 + 1 = 3. Space rebuilds. It collapses onto a yellow line. Red sheets shrink to dots: 1 + 2 = 3."
+  },
+  {
+   "id": "solve",
+   "tags": [],
+   "say": "And here's why you care. [pause] Solving A x equals b is the pancake question, backwards. Which inputs land on b? [pause] If b is off the pancake: none. No solution. [beat] If b is on it: a whole stick lands there. [pause] So find one particular solution, call it x zero, and every solution is x zero plus something from the kernel.",
+   "see": "A yellow target dot b sits on the range line. A whole red stick lights up above it. Its label reads x0 + ker(L). The dot b slides off the line. Everything goes dark. The label reads: no solution."
+  },
+  {
+   "id": "membership",
+   "tags": [
+    "exam"
+   ],
+   "say": "So how do you check if b is on the pancake? [pause] Glue b onto A and row reduce. [beat] For b equals one, two: the last row is all zeros. Fine, it's on the pancake. [pause] For b equals one, three: the last row says zero equals one. [long] Impossible. b is off the pancake.",
+   "see": "The augmented matrix [1 -1 | 1; 2 -2 | 2] row-reduces; the bottom row becomes 0 0 | 0 and turns green. Then [1 -1 | 1; 2 -2 | 3] row-reduces; the bottom row becomes 0 0 | 1 and flashes red with '0 = 1?!'. On the side, the yellow range line shows the first b on it and the second b floating off it."
+  },
+  {
+   "id": "exam",
+   "tags": [
+    "exam"
+   ],
+   "say": "On the test, skip the pictures. [pause] Row reduce. [beat] Pivots give the rank, the dimension of the range. That's Theorem 5.9. And the Range Method: the range is spanned by the pivot columns of the original A, not the reduced one. [pause] Free variables give the dimension of the kernel. [pause] Together: n, the number of columns, which is the dimension of the domain.",
+   "see": "A 3 by 5 matrix row-reduces. Pivot columns light up yellow. They get copied from the ORIGINAL A with a warning tag. Free columns light up red. The counts drop into 3 + 2 = 5."
+  },
+  {
+   "id": "kernelmethod",
+   "tags": [
+    "exam"
+   ],
+   "say": "And the Kernel Method, for the actual kernel vectors: [pause] set one free variable to one, the others to zero, and solve. [beat] Each free variable gives you one basis vector. [pause] Here, two free variables... two vectors. The kernel's a plane.",
+   "see": "The reduced matrix stays on screen. Free variable x2 is set to 1 and x5 to 0. The vector [-2, 1, 0, 0, 0] builds itself entry by entry. Then x5 = 1, x2 = 0: the vector [-6, 0, 3, -2, 1] builds. Both get boxed under ker(L), with a sympy-checked tick."
+  },
+  {
+   "id": "transpose",
+   "tags": [
+    "exam"
+   ],
+   "say": "One last tool, Corollary 5.11. [pause] The rank of A equals the rank of A transpose. [beat] Flip the matrix on its side and the pivot count doesn't move. [pause] So this A has rank three, and A transpose, five by three, has rank three too. Its kernel is just zero.",
+   "see": "The 3 by 5 matrix A rotates into its 5 by 3 transpose. A pivot counter on each reads 3. Then for A transpose: 3 columns, rank 3, kernel dimension 3 minus 3 = 0, and its kernel shrinks to a single dot."
+  },
+  {
+   "id": "poly",
+   "tags": [
+    "exam"
+   ],
+   "say": "It even works without arrows. [pause] Differentiation, P three to P two. [beat] Crushed: the constants. Dimension one. [pause] Out comes every quadratic. Dimension three. [beat] One plus three is four. Exactly P three.",
+   "see": "The polynomial ax^3 + bx^2 + cx + d slides into a press labelled d/dx. The constant d turns red. It drops into a 'crushed' bin. The output 3ax^2 + 2bx + c glows yellow. 1 + 3 = 4 lands."
+  },
+  {
+   "id": "next",
+   "tags": [],
+   "say": "One last thing, because it's next week's whole lesson. [pause] If the kernel is just the zero vector, every stick is a single dot: L is one to one. [beat] If the range is everything, L is onto.",
+   "see": "Card one: ker(L) = {0}. Every stick shrinks to a lone dot. Label: one-to-one. Card two: range(L) = W. The pancake spreads to cover the whole plate. Label: onto."
+  },
+  {
+   "id": "callback",
+   "tags": [
+    "callback"
+   ],
+   "say": "So next time a scary transformation shows up on your exam... [pause] ask the pancake question. [beat] How big is one stick? [beat] And how many sticks are there?",
+   "see": "Back in the dorm. The burger pancake sits on the phone coaster. A tiny spaghetti stick stands on it. It winks."
+  }
+ ]
+}

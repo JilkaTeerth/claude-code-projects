@@ -1,0 +1,98 @@
+#!/bin/sh
+# Open the Study Desk, or manage it.
+# Self-heal (2026-10-03): launchd once parked the server as "pended nondemand spawn =
+# inefficient" and never respawned it despite KeepAlive. So anything that opens the page
+# first makes sure it is actually answering, and kicks it if not.
+ensure_up() {
+  curl -s -o /dev/null -m 3 http://localhost:7474/ && return 0
+  echo "study desk was down, restarting it"
+  launchctl kickstart -k gui/501/com.teerth.studydesk
+  for i in 1 2 3 4 5 6 7 8 9 10; do sleep 1; curl -s -o /dev/null -m 2 http://localhost:7474/ && return 0; done
+  echo "still down: check ~/Library/Logs/studydesk.log"
+}
+case "$1" in
+  build)   python3 ~/.study-desk/parse_syllabus.py && ~/bin/study-guide --days "${2:-21}" ;;
+  sync)    ~/bin/canvas-sweep-run && tail -6 ~/Library/Logs/canvas-sweep.log ;;
+  log)     tail -30 ~/Library/Logs/canvas-sweep.log ;;
+  restart) launchctl kickstart -k gui/501/com.teerth.studydesk && echo "study desk restarted" ;;
+  status)
+    ensure_up
+    printf "study desk   "
+    curl -s -o /dev/null -w "http %{http_code}" http://localhost:7474/ 2>/dev/null || printf "DOWN"
+    launchctl print gui/501/com.teerth.studydesk 2>/dev/null | grep -qE "state = running" \
+      && echo "  (daemon running)" || echo "  (DAEMON DOWN)"
+    printf "canvas sweep "
+    if launchctl print gui/501/com.teerth.canvas-sweep >/dev/null 2>&1; then
+      runs=$(launchctl print gui/501/com.teerth.canvas-sweep 2>/dev/null | awk '/^\truns =/{print $3}')
+      last=$(grep -c "^---.*|" ~/Library/Logs/canvas-sweep.log 2>/dev/null)
+      printf "scheduled 4x daily, %s launchd run(s), %s logged sync(s)\n" "${runs:-0}" "${last:-0}"
+      printf "last sync    %s\n" "$(grep '^--- 20' ~/Library/Logs/canvas-sweep.log 2>/dev/null | tail -1)"
+    else
+      echo "NOT LOADED"
+    fi
+    printf "dead switch  "
+    ~/bin/todoist tasks 2>/dev/null | grep -i "sync alive" | awk '{print "due "$2}' || echo "missing"
+    ;;
+  h[0-9]|hw[0-9]|H[0-9]|HW[0-9])
+    # `desk h3` opens the DSC 215 HW3 template. The whole point is that the thing he
+    # types is short and has no spaces in it, because a path he has to quote is exactly
+    # the kind of friction that stops him starting.
+    n=$(echo "$1" | tr -dc '0-9')
+    f="$HOME/Desktop/F&M Notes/DSC 215/HW$n/m215hwk$n.Rmd"
+    if [ -f "$f" ]; then
+      echo "opening HW$n: $f"; open "$f"
+    else
+      echo "no template at $f"
+      echo "built templates:"; ls -1 "$HOME/Desktop/F&M Notes/DSC 215"/HW*/*.Rmd 2>/dev/null
+    fi ;;
+  guide)
+    ensure_up
+    g="${2:-}"
+    if [ -z "$g" ]; then open http://localhost:7474/; else open "http://localhost:7474/guide/$g"; fi ;;
+  review)
+    # desk review "<title>" --course "CPS 112" --path <file> --why "..." --by 2026-09-27 --before "HW3"
+    # Puts something Claude built for him on the desk's To review list. It is a plain Todoist
+    # task (so it reaches the phone widget); the [review:<path>] stamp is what the desk reads.
+    shift; title="$1"; shift
+    course=""; path=""; why=""; by=""; before=""
+    while [ $# -gt 0 ]; do
+      case "$1" in
+        --course) course="$2"; shift 2 ;;
+        --path)   path="$2";   shift 2 ;;
+        --why)    why="$2";    shift 2 ;;
+        --by)     by="$2";     shift 2 ;;
+        --before) before="$2"; shift 2 ;;
+        *) echo "unknown option $1"; exit 1 ;;
+      esac
+    done
+    if [ -z "$title" ] || [ -z "$course" ] || [ -z "$by" ]; then
+      echo 'usage: desk review "<title>" --course "CPS 112" --by 2026-09-27 [--path file] [--why "..."] [--before "HW3"]'
+      exit 1
+    fi
+    notes="$HOME/Desktop/F&M Notes/"
+    rel="-"
+    if [ -n "$path" ]; then
+      case "$path" in
+        "$notes"*) rel="${path#"$notes"}" ;;
+        /*) echo "path must be inside $notes so the desk can open it"; exit 1 ;;
+        *) rel="$path" ;;
+      esac
+      [ -f "$notes$rel" ] || { echo "no such file: $notes$rel"; exit 1; }
+    fi
+    desc="${why:-Review this}"
+    [ -n "$before" ] && desc="$desc
+Before: $before"
+    desc="$desc
+[review:$rel]"
+    ~/bin/todoist add "Review: $title" --due "$by" --project "$course" --priority 3 --desc "$desc" ;;
+  help|-h|--help)
+    echo "desk            open the Study Desk"
+    echo 'desk review "T" --course C --by DATE [--path F] [--why W] [--before B]   add to To review'
+    echo "desk h3         open the DSC 215 HW3 R template (h4, h5 ... too)"
+    echo "desk guide X    open a study guide by slug"
+    echo "desk status     is anything broken"
+    echo "desk sync       force a Canvas sync now"
+    echo "desk build      rebuild study guides"
+    echo "desk log        recent sync log" ;;
+  *)       ensure_up; open http://localhost:7474/ ;;
+esac

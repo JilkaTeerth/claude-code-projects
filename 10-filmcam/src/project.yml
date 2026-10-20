@@ -1,0 +1,40 @@
+name: FilmCam
+options:
+  bundleIdPrefix: app.filmcam
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    # Strict concurrency plus an AVFoundation capture queue plus @MainActor UI
+    # produces a wall of errors on day one that teaches nothing about cameras.
+    # Turned on later as a hardening pass, deliberately not now.
+    SWIFT_STRICT_CONCURRENCY: minimal
+    SWIFT_VERSION: "5.0"
+    # Required for custom Core Image kernels once the Metal toolchain lands.
+    OTHER_METAL_COMPILER_FLAGS: -fcikernel
+    MTLLINKER_FLAGS: -fcikernel
+
+targets:
+  FilmCam:
+    type: application
+    platform: iOS
+    sources:
+      - path: FilmCam
+    resources:
+      - path: FilmCam/Resources
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.filmcam.FilmCam
+        INFOPLIST_KEY_NSCameraUsageDescription: FilmCam needs the camera to show the live filtered preview.
+        INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription: FilmCam saves your shots to your photo library.
+        INFOPLIST_KEY_UIStatusBarHidden: true
+        INFOPLIST_KEY_UISupportedInterfacePhone: UIInterfaceOrientationPortrait
+        # Hot reload: lets a new looks.json be dragged onto the device in Finder.
+        INFOPLIST_KEY_UIFileSharingEnabled: true
+        INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace: true
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: true
+        CODE_SIGN_STYLE: Automatic

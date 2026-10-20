@@ -1,0 +1,342 @@
+#!/usr/bin/env python3
+"""Canvas -> Todoist sweep. Stateless, reconciling, cloud-safe.
+
+Replaces `todoist sync-canvas` + `watch-canvas`, which died silently on 4 Sep 2026
+(launchd StartInterval stuck in 'pended nondemand spawn', runs=1 in 9 days).
+
+Design rules learned from that failure:
+  * No local state file. The Canvas assignment id is stored INSIDE the Todoist task
+    description as [canvas:<id>], so dedup is derived from Todoist itself and works
+    identically on this laptop or in an ephemeral cloud sandbox.
+  * Reconciles both ways: submitted on Canvas -> close the task. Never resurrect.
+  * Undated assignments still produce tasks. That is how MAT 215 Quiz 2 stayed invisible.
+  * Exits nonzero and prints LOUDLY on failure. Silent success was the original sin.
+
+Credentials: env vars first (cloud), then ~/.canvas_env and ~/.todoist_env (local).
+Usage: canvas-sweep [--dry-run]
+"""
+import json, os, re, sys, html, datetime, urllib.request, urllib.error
+
+DRY = "--dry-run" in sys.argv
+
+def load_env(path, keys):
+    out = {}
+    p = os.path.expanduser(path)
+    if os.path.exists(p):
+        for line in open(p):
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                k, v = line.split("=", 1)
+                out[k.strip()] = v.strip()
+    for k in keys:
+        if os.environ.get(k):
+            out[k] = os.environ[k]
+    return out
+
+cv = load_env("~/.canvas_env", ["CANVAS_HOST", "CANVAS_TOKEN"])
+td = load_env("~/.todoist_env", ["TODOIST_TOKEN"])
+HOST = cv.get("CANVAS_HOST", "").rstrip("/")
+CTOK = cv.get("CANVAS_TOKEN", "")
+TTOK = td.get("TODOIST_TOKEN", "")
+if not (HOST and CTOK and TTOK):
+    sys.exit("FATAL: missing CANVAS_HOST / CANVAS_TOKEN / TODOIST_TOKEN")
+
+TBASE = "https://api.todoist.com/api/v1"
+
+# course id -> (todoist project, difficulty 1-5). MAT-215 and DSC-215 both route to DSC 215.
+# course id -> (todoist project, baseline hours for a big piece of work)
+COURSES = {
+    "25929": ("MAT 230", 6),
+    "25520": ("CPS 112", 7),
+    "25857": ("DSC 215", 4),
+    "25561": ("ANT 100", 4),
+}
+SUBMITTABLE = {"online_upload", "online_text_entry", "online_url",
+               "online_quiz", "online_text", "discussion_topic", "external_tool"}
+ASSESSMENT = re.compile(r"^(q\d|quiz|exam|test|midterm|final)\b", re.I)
+# Andrilli & Hecker 4th ed: PDF page = printed page + 30 (MAT 230 only)
+PDF_OFFSET = {"MAT 230": 30}
+TEXTBOOK = {"MAT 230": "Andrilli & Hecker 4th ed (~/Downloads)"}
+
+def req(url, tok, method="GET", body=None, ctype=False):
+    data = json.dumps(body).encode() if body is not None else None
+    h = {"Authorization": "Bearer " + tok}
+    if ctype and data:
+        h["Content-Type"] = "application/json"
+    r = urllib.request.Request(url, data=data, headers=h, method=method)
+    with urllib.request.urlopen(r, timeout=40) as resp:
+        raw = resp.read().decode().strip()
+        return json.loads(raw) if raw else None
+
+def canvas(path):
+    out, url = [], HOST + path
+    while url:
+        rq = urllib.request.Request(url, headers={"Authorization": "Bearer " + CTOK})
+        with urllib.request.urlopen(rq, timeout=40) as r:
+            d = json.load(r)
+            link = r.headers.get("Link", "")
+        if isinstance(d, dict):
+            return d
+        out.extend(d)
+        m = re.search(r'<([^>]+)>;\s*rel="next"', link)
+        url = m.group(1) if m else None
+    return out
+
+def todoist(path, method="GET", body=None):
+    try:
+        return req(TBASE + path, TTOK, method, body, ctype=True)
+    except urllib.error.HTTPError as e:
+        sys.exit("FATAL Todoist %s on %s: %s" % (e.code, path, e.read().decode()[:300]))
+
+def td_list(path):
+    out, cursor = [], None
+    while True:
+        p = path + (("&" if "?" in path else "?") + "cursor=" + cursor if cursor else "")
+        d = todoist(p)
+        if isinstance(d, list):
+            return d
+        # list endpoints wrap in "results"; the completed-tasks endpoint uses "items".
+        # Reading only "results" made every completed task invisible, so ticked tasks came back.
+        out.extend(d.get("results", d.get("items", [])))
+        cursor = d.get("next_cursor")
+        if not cursor:
+            return out
+
+def clean(h_):
+    t = re.sub("<[^>]+>", " ", h_ or "")
+    return html.unescape(re.sub(r"\s+", " ", t)).strip()
+
+def sections(desc, project):
+    """Pull 'Section 2.3 (p 123): numbers 8(b)' refs out of an assignment body.
+    the professor writes these every time, so this is the whole 'textbook open to the right page' job.
+    He is not consistent about ordering: HW1 reads 'Section 1.2: number 9 (page 29)' while
+    HW2 reads 'Section 2.3 (p 123): numbers 8(b)'. So split on the Section headings and
+    scan each chunk for a page number wherever it happens to sit."""
+    txt = clean(desc)
+    marks = [(m.start(), m.group(1)) for m in re.finditer(r"Section\s+(\d+\.\d+)", txt, re.I)]
+    if not marks:
+        return None
+    off = PDF_OFFSET.get(project)
+    out = []
+    for i, (pos, sec) in enumerate(marks):
+        stop = marks[i + 1][0] if i + 1 < len(marks) else len(txt)
+        chunk = txt[pos:stop]
+        chunk = re.sub(r"^Section\s+[\d.]+\s*", "", chunk, flags=re.I).strip(" :;.,")
+        pm = re.search(r"pages?\s*\.?\s*(\d+)(?:\s*-\s*(\d+))?|\bpp?\.?\s*(\d+)(?:\s*-\s*(\d+))?", chunk, re.I)
+        page = None
+        if pm:
+            page = pm.group(1) or pm.group(3)
+            chunk = (chunk[:pm.start()] + chunk[pm.end():])
+        chunk = re.sub(r"\(\s*\)", "", chunk).strip(" :;.,")
+        chunk = chunk.strip("(") if chunk.count("(") and not chunk.count(")") else chunk
+        # strip() above can eat a closing paren off "6(d)", so rebalance
+        while chunk.count("(") > chunk.count(")"):
+            chunk += ")"
+        bit = "Section " + sec
+        if page:
+            bit += " (book p%s" % page
+            if off:
+                bit += ", PDF p%d" % (int(page) + off)
+            bit += ")"
+        if chunk:
+            bit += ": " + chunk
+        out.append(bit)
+    return out
+
+ROMAN = {"i":"1","ii":"2","iii":"3","iv":"4","v":"5"}
+
+def norm(name):
+    n = re.sub(r"[^a-z0-9 ]", " ", (name or "").lower())
+    n = re.sub(r"\s+", " ", n).strip()
+    n = re.sub(r":.*$", "", n).strip()
+    parts = n.split(" ")
+    if parts and parts[-1] in ROMAN:
+        parts[-1] = ROMAN[parts[-1]]
+    return " ".join(parts)
+
+def estimate(points, baseline):
+    """Weight class, not raw points. DSC 215 grades homework out of 1.0 point, so
+    scaling directly off points_possible produced a nonsense 0.5h for a stats problem set."""
+    if points is None:
+        return None
+    if points >= 75:   f = 1.0
+    elif points >= 20: f = 0.6
+    else:              f = 0.4
+    return round(baseline * f * 2) / 2.0
+
+def main():
+    now = datetime.datetime.now(datetime.timezone.utc)
+    projects = {p["name"]: p["id"] for p in td_list("/projects")}
+    for name, _ in COURSES.values():
+        if name not in projects:
+            if DRY:
+                print("would create project", name); continue
+            projects[name] = todoist("/projects", "POST", {"name": name})["id"]
+            print("created project", name)
+
+    # Build the seen-map from Todoist itself: open tasks + recently completed.
+    seen = {}
+    for t in td_list("/tasks"):
+        m = re.search(r"\[canvas:(\d+)\]", t.get("description") or "")
+        if m:
+            seen[m.group(1)] = t
+    done_ids = set()
+    try:
+        for t in td_list("/tasks/completed/by_completion_date?since=%s&until=%s" % (
+                (now - datetime.timedelta(days=80)).strftime("%Y-%m-%dT%H:%M:%S"),
+                now.strftime("%Y-%m-%dT%H:%M:%S"))):
+            m = re.search(r"\[canvas:(\d+)\]", t.get("description") or "")
+            if m:
+                done_ids.add(m.group(1))
+    except SystemExit:
+        print("warn: completed-task lookup failed, dedup is open-tasks-only this run")
+
+    created = closed = skipped = retimed = 0
+    needs_date = []
+    for cid, (project, diff) in COURSES.items():
+        try:
+            items = canvas("/api/v1/courses/%s/assignments?include[]=submission&per_page=100" % cid)
+        except Exception as e:
+            print("ERROR fetching course %s: %s" % (cid, e)); continue
+        # Canvas carries duplicate gradebook columns (Response Paper I appears twice,
+        # once dated once not). Collapse by normalised name and keep the dated one.
+        best = {}
+        for a in items:
+            k = norm(a["name"])
+            cur = best.get(k)
+            if cur is None or (a.get("due_at") and not cur.get("due_at")):
+                best[k] = a
+        items = list(best.values())
+
+        for a in items:
+            aid = str(a["id"])
+            sub = a.get("submission") or {}
+            submitted = bool(sub.get("submitted_at")) or sub.get("score") is not None
+            task = seen.get(aid)
+
+            if submitted:
+                if task:
+                    if DRY:
+                        print("would CLOSE  %-12s %s" % (project, a["name"]))
+                    else:
+                        todoist("/tasks/%s/close" % task["id"], "POST")
+                        print("closed  %-12s %s" % (project, a["name"]))
+                    closed += 1
+                continue
+
+            if task:
+                # Canvas often posts an assignment with NO date and fills it in later
+                # (or a professor moves a deadline). Keep the Todoist task in step.
+                # The last-known Canvas due is stamped into the description as
+                # [cdue:...] so drift is detectable with no extra state file.
+                sm = re.search(r"\[cdue:([^\]]*)\]", task.get("description") or "")
+                # NB: keep "" distinct from None. "" means "we stamped it and Canvas had
+                # no date"; None means "never stamped". Collapsing them made every
+                # undated task retime itself on every single run.
+                stored = sm.group(1) if sm else None
+                cdue = a.get("due_at")
+                if stored != (cdue or ""):
+                    desc = task.get("description") or ""
+                    if sm:
+                        desc = desc.replace(sm.group(0), "[cdue:%s]" % (cdue or ""))
+                    else:
+                        desc = desc.replace("[canvas:%s]" % aid,
+                                            "[canvas:%s][cdue:%s]" % (aid, cdue or ""))
+                    body = {"description": desc}
+                    if cdue:
+                        body["due_datetime"] = cdue
+                    if DRY:
+                        print("would RETIME %-12s %-30s %s -> %s" % (
+                            project, a["name"][:30], stored or "none", cdue or "none"))
+                    else:
+                        todoist("/tasks/%s" % task["id"], "POST", body)
+                        print("retimed %-12s %-30s %s -> %s" % (
+                            project, a["name"][:30], stored or "none", cdue or "none"))
+                    retimed += 1
+                skipped += 1
+                continue
+            if aid in done_ids:
+                skipped += 1
+                continue
+
+            due = a.get("due_at")
+            types = set(a.get("submission_types") or [])
+            if not due and not (types & SUBMITTABLE):
+                # A gradebook placeholder (types=none, no date): ANT 100 Engagement columns
+                # are a course-long conduct grade, not something he hands in. Never a task.
+                # But DSC 215 Q2 lives in this same bucket and is exactly the item the vault
+                # records as having "stayed invisible", so surface assessments to the nudge.
+                if ASSESSMENT.match(a["name"]):
+                    needs_date.append("%s: %s" % (project, a["name"]))
+                continue
+            if due:
+                d = datetime.datetime.strptime(due, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=datetime.timezone.utc)
+                if d < now - datetime.timedelta(days=3):
+                    continue   # stale backlog, do not spam
+            note = ["[canvas:%s][cdue:%s]" % (aid, due or ""), a.get("html_url", "")]
+            secs = sections(a.get("description"), project)
+            if secs:
+                note.append("")
+                note.append("Textbook: " + TEXTBOOK.get(project, "see Canvas"))
+                note += ["  " + s for s in secs]
+            est = estimate(a.get("points_possible"), diff)
+            if est:
+                note.append("")
+                note.append("Rough estimate: %sh" % (int(est) if est == int(est) else est))
+            if not due:
+                note.append("")
+                note.append("NO DUE DATE ON CANVAS. Confirm the real date in class.")
+
+            body = {"content": a["name"], "project_id": projects[project],
+                    "description": "\n".join(note), "priority": 3}
+            if due:
+                body["due_datetime"] = due
+            if DRY:
+                print("would CREATE %-12s %-34s due=%s est=%s" % (project, a["name"][:34], due, est))
+            else:
+                todoist("/tasks", "POST", body)
+                print("created %-12s %-34s due=%s" % (project, a["name"][:34], due))
+            created += 1
+
+    if needs_date:
+        print("\nUNDATED ASSESSMENTS (no Canvas date, confirm in class):")
+        for n in needs_date:
+            print("  ! " + n)
+
+    # Dead man's switch. Every successful run pushes this task 26h into the future.
+    # If the sweep ever dies again, the task goes OVERDUE and turns red at the top of
+    # his Todoist Today view, which is the surface he actually looks at. No second
+    # watchdog process to also get stuck, no cloud dependency. The previous sync died
+    # silently for nine days precisely because nothing downstream noticed its absence.
+    if not DRY:
+        try:
+            alive = None
+            for t in td_list("/tasks"):
+                if t.get("content", "").startswith("Canvas sync alive"):
+                    alive = t
+                    break
+            nxt = (now + datetime.timedelta(hours=26)).strftime("%Y-%m-%dT%H:%M:%S")
+            payload = {"content": "Canvas sync alive (auto, ignore me)",
+                       "description": "If this is OVERDUE and red, canvas-sweep has stopped "
+                                      "running and Todoist is going stale. Check "
+                                      "~/Library/Logs/canvas-sweep.log",
+                       "due_datetime": nxt, "priority": 1}
+            if alive:
+                todoist("/tasks/%s" % alive["id"], "POST", {"due_datetime": nxt})
+            else:
+                todoist("/tasks", "POST", payload)
+        except SystemExit:
+            print("warn: could not update the dead man's switch")
+
+    stamp = now.astimezone().strftime("%Y-%m-%d %H:%M")
+    print("--- %s | created %d, closed %d, retimed %d, already-known %d ---"
+          % (stamp, created, closed, retimed, skipped))
+    if not DRY:
+        hb = os.path.expanduser("~/.canvas-sweep-heartbeat")
+        try:
+            open(hb, "w").write(json.dumps({"at": now.isoformat(), "created": created, "closed": closed}))
+        except OSError:
+            pass
+
+if __name__ == "__main__":
+    main()

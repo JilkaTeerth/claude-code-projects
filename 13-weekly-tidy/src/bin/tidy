@@ -1,0 +1,413 @@
+#!/usr/bin/env python3
+"""Weekly file tidy for Teerth's Mac. Runs Sunday 19:00 via launchd (com.teerth.tidy).
+
+Born from the 2026-09-27 cleanup (vault: Dev Logs/2026-09-27 — File Cleanup). Same rules:
+  * Never delete, never overwrite. Only mv, with a " (2)" suffix on collision. Every move
+    is logged to ~/.tidy/moves.log as  time<TAB>src<TAB>-><TAB>dst<TAB>reason.
+  * Only CERTAIN cases move automatically. Anything else is listed in ~/.tidy/pending.md
+    and waits for Teerth (open Claude, say "tidy"). Topic similarity is never enough.
+  * Files touched in the last 2 hours are skipped: he may be working in them.
+
+Automatic (certain) cases:
+  1. macOS screenshots              -> ~/Pictures/Screenshots/YYYY-MM/
+  2. .dmg/.pkg for an installed app -> ~/_Review Before Delete/installers/
+  3. byte-identical duplicates      -> ~/_Review Before Delete/duplicates/
+     ("X (1).pdf" identical to "X.pdf", or identical to a file already in F&M Notes)
+  4. coursework whose course is certain -> ~/Desktop/F&M Notes/<COURSE>/_Inbox/
+     certain = the filename has a course code, OR the extension belongs to exactly one
+     course this semester, OR a PDF's first page names exactly one course code.
+     Course codes live in ~/.tidy/config.json; update them each semester.
+
+Usage:
+  tidy                 scan, do the certain moves, write pending.md, update Todoist
+  tidy --dry-run       show what would happen; move nothing, touch nothing
+  tidy --no-todoist    run without touching Todoist
+  tidy status          print the pending list and review-pile size
+  tidy mv SRC DSTDIR [REASON]   logged, no-overwrite move (used in "tidy" sessions)
+"""
+import datetime, hashlib, json, os, re, shutil, subprocess, sys, urllib.request, urllib.error
+
+HOME = os.path.expanduser("~")
+STATE = os.path.join(HOME, ".tidy")
+LOG = os.path.join(STATE, "moves.log")
+REVIEW = os.path.join(HOME, "_Review Before Delete")
+NOTES = os.path.join(HOME, "Desktop", "F&M Notes")
+SHOTS = os.path.join(HOME, "Pictures", "Screenshots")
+DRY = "--dry-run" in sys.argv
+NO_TD = "--no-todoist" in sys.argv or DRY
+NOW = datetime.datetime.now()
+FRESH = 2 * 3600          # skip anything modified in the last 2 hours
+MARK = "[tidy:weekly]"    # dedup key stored in the Todoist task description
+
+DEFAULT_CONFIG = {
+    "_note": "Edit each semester. Codes are matched case-insensitively, ignoring spaces, dashes and underscores.",
+    "courses": {
+        "DSC 215": ["m215", "mat215", "dsc215"],
+        "MAT 230": ["mat230", "m230"],
+        "CPS 112": ["cps112"],
+        "ANT 100": ["ant100"],
+    },
+    "extensions": {".java": "CPS 112", ".rmd": "DSC 215", ".nb": "MAT 230"},
+    "keep_desktop": ["F&M Notes", "Desktop - Teerth’s Laptop (2)", "power-hour"],
+    "keep_home": ["_Review Before Delete", "Applications", "bin", "Desktop", "Documents",
+                  "Downloads", "Dropbox", "Library", "Movies", "Music", "Pictures",
+                  "Projects", "Public", "Reels", "Zotero",
+                  "OneDrive - Mahindra International School"],
+}
+
+
+def config():
+    p = os.path.join(STATE, "config.json")
+    if not os.path.exists(p):
+        os.makedirs(STATE, exist_ok=True)
+        with open(p, "w") as f:
+            json.dump(DEFAULT_CONFIG, f, indent=2, ensure_ascii=False)
+    with open(p) as f:
+        return json.load(f)
+
+
+def squash(s):
+    return re.sub(r"[\s_\-]", "", s.lower())
+
+
+def log_move(src, dst, why):
+    with open(LOG, "a") as f:
+        f.write("%s\t%s\t->\t%s\t%s\n" % (NOW.strftime("%F %T"), src, dst, why))
+
+
+def move(src, dstdir, why):
+    """No-overwrite move. Returns the final path (or the would-be path on --dry-run)."""
+    base = os.path.basename(src.rstrip("/"))
+    dst, n = os.path.join(dstdir, base), 2
+    stem, ext = os.path.splitext(base) if os.path.isfile(src) else (base, "")
+    while os.path.exists(dst):
+        dst = os.path.join(dstdir, "%s (%d)%s" % (stem, n, ext)); n += 1
+    if DRY:
+        return dst
+    os.makedirs(dstdir, exist_ok=True)
+    shutil.move(src, dst)
+    log_move(src, dst, why)
+    return dst
+
+
+def md5(p):
+    h = hashlib.md5()
+    with open(p, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def notes_index():
+    """size -> [paths] for everything in F&M Notes, so duplicates are cheap to find."""
+    idx = {}
+    for root, dirs, files in os.walk(NOTES):
+        dirs[:] = [d for d in dirs if not d.startswith(".")]
+        for fn in files:
+            p = os.path.join(root, fn)
+            try:
+                idx.setdefault(os.path.getsize(p), []).append(p)
+            except OSError:
+                pass
+    return idx
+
+
+def pdf_first_page(p):
+    try:
+        import fitz
+        d = fitz.open(p)
+        return d[0].get_text()[:1500] if d.page_count else ""
+    except Exception:
+        return ""
+
+
+def code_re(code):
+    """'mat215' -> matches MAT215, MAT 215, mat-215, MAT_215 as a whole token only,
+    so 'constant 100' never counts as ANT 100 and 'm2150' never counts as m215."""
+    m = re.match(r"([a-z]+)\s*[\s_\-]*\s*(\d+)$", squash(code))
+    if not m:
+        return None
+    return re.compile(r"(?<![a-z])%s[\s_\-]*%s(?!\d)" % m.groups(), re.I)
+
+
+def matches(text, codes):
+    return any(r.search(text) for r in filter(None, map(code_re, codes)))
+
+
+def detect_course(p, cfg):
+    """Return (course, how) only when certain, else (None, hint)."""
+    name = os.path.basename(p)
+    hits = {c for c, codes in cfg["courses"].items() if matches(name, codes + [c])}
+    if len(hits) == 1:
+        c = hits.pop(); return c, "course code in filename"
+    ext = os.path.splitext(p)[1].lower()
+    if not hits and ext in cfg["extensions"]:
+        return cfg["extensions"][ext], "only %s uses %s files" % (cfg["extensions"][ext], ext)
+    if ext == ".pdf":
+        text = pdf_first_page(p)
+        found = {c for c, codes in cfg["courses"].items() if matches(text, codes + [c])}
+        if len(found) == 1:
+            c = found.pop(); return c, "PDF first page names %s" % c
+        if found:
+            return None, "PDF mentions several courses: " + ", ".join(sorted(found))
+    return None, ""
+
+
+def installed_apps():
+    names = []
+    for d in ("/Applications", os.path.join(HOME, "Applications")):
+        try:
+            names += [n[:-4].lower() for n in os.listdir(d) if n.endswith(".app")]
+        except OSError:
+            pass
+    return names
+
+
+def peek(p):
+    """One line that helps Teerth answer 'where does this go' without opening it."""
+    try:
+        if os.path.isdir(p):
+            items = [i for i in os.listdir(p) if not i.startswith(".")]
+            return "folder, %d items: %s" % (len(items), ", ".join(items[:4]))
+        ext = os.path.splitext(p)[1].lower()
+        if ext == ".pdf":
+            t = " ".join(pdf_first_page(p).split())
+            return t[:140] or "PDF (no text layer)"
+        if ext in (".txt", ".md", ".py", ".java", ".rmd", ".json", ".csv", ".tex", ".html"):
+            with open(p, errors="ignore") as f:
+                return " ".join(f.read(400).split())[:140]
+        return "%s file" % (ext or "extensionless")
+    except Exception as e:
+        return "(could not read: %s)" % e
+
+
+def human(n):
+    for u in ("B", "KB", "MB", "GB"):
+        if n < 1024 or u == "GB":
+            return "%.0f%s" % (n, u) if u in ("B", "KB") else "%.1f%s" % (n, u)
+        n /= 1024.0
+
+
+def size_of(p):
+    if os.path.isfile(p):
+        return os.path.getsize(p)
+    tot = 0
+    for root, _, files in os.walk(p):
+        for fn in files:
+            try:
+                tot += os.path.getsize(os.path.join(root, fn))
+            except OSError:
+                pass
+    return tot
+
+
+def candidates(cfg):
+    """Loose top-level items in Downloads, Desktop and ~ that are not part of the structure."""
+    out = []
+    dl = os.path.join(HOME, "Downloads")
+    for fn in os.listdir(dl):
+        p = os.path.join(dl, fn)
+        if fn.startswith(".") or fn.startswith("~$"):
+            continue
+        # The emoji category folders ARE the Downloads structure; leave them alone.
+        if os.path.isdir(p) and not fn[:1].isascii():
+            continue
+        out.append(p)
+    desk = os.path.join(HOME, "Desktop")
+    for fn in os.listdir(desk):
+        if not fn.startswith(".") and fn not in cfg["keep_desktop"]:
+            out.append(os.path.join(desk, fn))
+    for fn in os.listdir(HOME):
+        if not fn.startswith(".") and fn not in cfg["keep_home"]:
+            out.append(os.path.join(HOME, fn))
+    return out
+
+
+def scan():
+    cfg = config()
+    apps = installed_apps()
+    idx = notes_index()
+    moved, pending, skipped = [], [], []
+    for p in sorted(candidates(cfg)):
+        fn = os.path.basename(p)
+        try:
+            age = NOW.timestamp() - os.path.getmtime(p)
+        except OSError:
+            continue
+        if fn.endswith((".crdownload", ".download", ".part")) or age < FRESH:
+            skipped.append(p); continue
+        is_file = os.path.isfile(p)
+        ext = os.path.splitext(fn)[1].lower()
+
+        # 1. screenshots
+        m = re.match(r"Screenshot (\d{4})-(\d{2})-\d{2} at ", fn)
+        if is_file and m:
+            moved.append((p, move(p, os.path.join(SHOTS, "%s-%s" % m.groups()), "screenshot"), "screenshot"))
+            continue
+        # 2. installers for apps already installed
+        if is_file and ext in (".dmg", ".pkg"):
+            tok = re.match(r"[A-Za-z]+", fn)
+            tok = tok.group(0).lower() if tok else ""
+            if len(tok) >= 3 and any(tok in a for a in apps):
+                moved.append((p, move(p, os.path.join(REVIEW, "installers"), "installer, app already installed"), "installer, app is installed"))
+                continue
+        # 3. byte-identical duplicates
+        if is_file:
+            dup = None
+            m = re.match(r"^(.*) \((\d+)\)(\.[^.]+)?$", fn)
+            if m:
+                orig = os.path.join(os.path.dirname(p), m.group(1) + (m.group(3) or ""))
+                if os.path.isfile(orig) and os.path.getsize(orig) == os.path.getsize(p) and md5(orig) == md5(p):
+                    dup = orig
+            if not dup:
+                for q in idx.get(os.path.getsize(p), []):
+                    if md5(q) == md5(p):
+                        dup = q; break
+            if dup:
+                why = "identical to " + dup.replace(HOME, "~")
+                moved.append((p, move(p, os.path.join(REVIEW, "duplicates"), why), why))
+                continue
+        # 4. coursework with a certain course
+        if is_file:
+            course, how = detect_course(p, cfg)
+            if course:
+                moved.append((p, move(p, os.path.join(NOTES, course, "_Inbox"), how), "%s (%s)" % (course, how)))
+                continue
+            hint = how
+        else:
+            hint = ""
+        pending.append({"path": p, "size": human(size_of(p)),
+                        "modified": datetime.datetime.fromtimestamp(os.path.getmtime(p)).strftime("%d %b"),
+                        "peek": peek(p), "hint": hint})
+    return moved, pending, skipped
+
+
+def review_status():
+    if not os.path.isdir(REVIEW):
+        return None
+    items = [os.path.join(REVIEW, i) for i in os.listdir(REVIEW) if not i.startswith(".")]
+    if not items:
+        return None
+    oldest = min(os.path.getmtime(i) for i in items)
+    return {"size": human(size_of(REVIEW)), "days": int((NOW.timestamp() - oldest) // 86400)}
+
+
+def write_report(moved, pending, rv):
+    lines = ["# Weekly tidy, %s" % NOW.strftime("%a %d %b %Y %H:%M"), ""]
+    if moved:
+        lines += ["## Moved automatically (%d)" % len(moved), ""]
+        lines += ["- `%s` -> `%s` (%s)" % (s.replace(HOME, "~"), d.replace(HOME, "~"), w) for s, d, w in moved]
+        lines.append("")
+    lines += ["## Needs a home (%d)" % len(pending), ""]
+    if not pending:
+        lines.append("Nothing. Everything is where it belongs.")
+    for it in pending:
+        lines.append("- `%s` (%s, %s): %s%s" % (it["path"].replace(HOME, "~"), it["size"], it["modified"],
+                     it["peek"], ("  _hint: %s_" % it["hint"]) if it["hint"] else ""))
+    if rv:
+        lines += ["", "## Review pile", "", "`~/_Review Before Delete/` holds %s, oldest item %d days old. "
+                  "Skim `MANIFEST.md` (if present) and trash it when you're happy." % (rv["size"], rv["days"])]
+    with open(os.path.join(STATE, "pending.md"), "w") as f:
+        f.write("\n".join(lines) + "\n")
+    with open(os.path.join(STATE, "pending.json"), "w") as f:
+        json.dump({"generated": NOW.isoformat(), "pending": pending,
+                   "moved": [{"src": s, "dst": d, "why": w} for s, d, w in moved]}, f, indent=1)
+
+
+# ---------------- Todoist ----------------
+def todoist_token():
+    p = os.path.join(HOME, ".todoist_env")
+    if os.environ.get("TODOIST_TOKEN"):
+        return os.environ["TODOIST_TOKEN"]
+    if os.path.exists(p):
+        for line in open(p):
+            if line.strip().startswith("TODOIST_TOKEN="):
+                return line.split("=", 1)[1].strip()
+    return ""
+
+
+def td(path, tok, method="GET", body=None):
+    req = urllib.request.Request("https://api.todoist.com/api/v1" + path, method=method,
+                                 headers={"Authorization": "Bearer " + tok, "Content-Type": "application/json"},
+                                 data=json.dumps(body).encode() if body is not None else None)
+    with urllib.request.urlopen(req, timeout=30) as r:
+        raw = r.read()
+        return json.loads(raw) if raw else {}
+
+
+def sync_todoist(pending, rv):
+    tok = todoist_token()
+    if not tok:
+        print("!!! no Todoist token, skipping the reminder"); return
+    tasks, cursor = [], None
+    while True:
+        d = td("/tasks?limit=200" + ("&cursor=" + cursor if cursor else ""), tok)
+        tasks += d.get("results", []) if isinstance(d, dict) else d
+        cursor = d.get("next_cursor") if isinstance(d, dict) else None
+        if not cursor:
+            break
+    mine = [t for t in tasks if MARK in (t.get("description") or "")]
+    nag_review = rv and rv["days"] >= 14
+    if not pending and not nag_review:
+        for t in mine:
+            td("/tasks/%s/close" % t["id"], tok, "POST")
+            print("closed Todoist task (nothing pending)")
+        return
+    if pending:
+        title = "Weekly tidy: %d file%s need%s a home" % (len(pending), "" if len(pending) == 1 else "s",
+                                                          "s" if len(pending) == 1 else "")
+    else:
+        title = "Weekly tidy: trash the review pile (%s)" % rv["size"]
+    desc = [MARK, "Open Claude and say: tidy", "List: ~/.tidy/pending.md", ""]
+    desc += ["- " + os.path.basename(i["path"]) for i in pending[:15]]
+    if len(pending) > 15:
+        desc.append("- ... and %d more" % (len(pending) - 15))
+    if nag_review:
+        desc += ["", "Review pile: %s, %d days old. Skim and trash ~/_Review Before Delete/." % (rv["size"], rv["days"])]
+    body = {"content": title, "description": "\n".join(desc), "due_string": "today", "priority": 2}
+    if mine:
+        td("/tasks/%s" % mine[0]["id"], tok, "POST", body); print("updated Todoist task: " + title)
+    else:
+        td("/tasks", tok, "POST", body); print("created Todoist task: " + title)
+
+
+def main():
+    os.makedirs(STATE, exist_ok=True)
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    if args[:1] == ["mv"]:
+        if len(args) < 3:
+            sys.exit("usage: tidy mv SRC DSTDIR [REASON]")
+        src = os.path.abspath(os.path.expanduser(args[1]))
+        if not os.path.exists(src):
+            sys.exit("missing: " + src)
+        dst = move(src, os.path.abspath(os.path.expanduser(args[2])), args[3] if len(args) > 3 else "tidy session")
+        print("ok  %s -> %s" % (src.replace(HOME, "~"), dst.replace(HOME, "~"))); return
+    if args[:1] == ["status"]:
+        p = os.path.join(STATE, "pending.md")
+        print(open(p).read() if os.path.exists(p) else "no report yet; run: tidy"); return
+
+    moved, pending, skipped = scan()
+    rv = review_status()
+    tag = "would move" if DRY else "moved"
+    for s, d, w in moved:
+        print("%s  %s -> %s  (%s)" % (tag, s.replace(HOME, "~"), d.replace(HOME, "~"), w))
+    for it in pending:
+        print("pending  %s  [%s]" % (it["path"].replace(HOME, "~"), it["peek"][:70]))
+    for p in skipped:
+        print("skipped (changed in the last 2h or still downloading)  " + p.replace(HOME, "~"))
+    if rv:
+        print("review pile: %s, oldest %d days" % (rv["size"], rv["days"]))
+    if not DRY:
+        write_report(moved, pending, rv)
+        with open(os.path.join(STATE, "last-run"), "w") as f:
+            f.write("%s moved=%d pending=%d\n" % (NOW.isoformat(timespec="seconds"), len(moved), len(pending)))
+    if not NO_TD:
+        try:
+            sync_todoist(pending, rv)
+        except urllib.error.URLError as e:
+            print("!!! Todoist unreachable: %s" % e); sys.exit(2)
+    print("--- %s %d, pending %d ---" % (tag, len(moved), len(pending)))
+
+
+if __name__ == "__main__":
+    main()

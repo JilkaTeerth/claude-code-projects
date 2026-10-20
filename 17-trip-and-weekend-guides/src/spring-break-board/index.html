@@ -1,0 +1,1022 @@
+<title>Spring Break 2027 Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --ground:#EEF3F1; --paper:#FFFFFF; --sunk:#E3EBE8;
+  --ink:#0F2429; --ink-2:#44585C; --muted:#6E8084; --rule:#CFDAD7;
+  --accent:#0B6E6C; --accent-soft:#D4ECE9; --heat:#2BB3A8;
+  --board:#0E2227; --board-row:#132C32; --board-rule:#23434A; --flap:#F4B63F; --flap-dim:#9FB3B1;
+  --good:#1D7F47; --good-bg:#DDF1E4; --warn:#9A6400; --warn-bg:#FBEBC8; --bad:#B23A2E; --bad-bg:#F8DEDA;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4;
+  --focus:#0B6E6C; --photo:#C9D6D3;
+  --display:"Big Shoulders Display","Arial Narrow","Roboto Condensed",Impact,sans-serif;
+  --body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --ground:#091518; --paper:#102125; --sunk:#0C1B1E;
+    --ink:#E6EFED; --ink-2:#A9BCBA; --muted:#7F9695; --rule:#21393D;
+    --accent:#3FC1B8; --accent-soft:#143A3A; --heat:#2BB3A8;
+    --board:#060F11; --board-row:#0C1A1D; --board-rule:#1C3338;
+    --good:#4FCB82; --good-bg:#12321F; --warn:#E6AE45; --warn-bg:#382A0D; --bad:#EE7A6C; --bad-bg:#3A1714;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181;
+    --focus:#3FC1B8; --photo:#1A3035;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --ground:#091518; --paper:#102125; --sunk:#0C1B1E;
+  --ink:#E6EFED; --ink-2:#A9BCBA; --muted:#7F9695; --rule:#21393D;
+  --accent:#3FC1B8; --accent-soft:#143A3A; --heat:#2BB3A8;
+  --board:#060F11; --board-row:#0C1A1D; --board-rule:#1C3338;
+  --good:#4FCB82; --good-bg:#12321F; --warn:#E6AE45; --warn-bg:#382A0D; --bad:#EE7A6C; --bad-bg:#3A1714;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181;
+  --focus:#3FC1B8; --photo:#1A3035;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;padding-inline:20px;padding-block:0 64px}
+a{color:var(--accent);text-underline-offset:2px}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:3px}
+img{max-width:100%;display:block}
+.wrap{max-width:1160px;margin-inline:auto;display:grid;gap:80px;min-width:0}
+.wrap > *{min-width:0}
+section > *{min-width:0}
+.panel,.scatter-wrap,.tbl-scroll,.board-scroll,.dossiers,.dos,.dos-body,.picks,.alsos,.smallprint,.timeline{min-width:0}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1;letter-spacing:.005em}
+h2{font-size:clamp(2rem,4.2vw,2.9rem);font-weight:800;text-transform:uppercase}
+h3{font-size:1.55rem;font-weight:800;text-transform:uppercase}
+p{margin:0;max-width:66ch}
+.eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.lede{color:var(--ink-2);font-size:1.05rem}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.note{font-size:.82rem;color:var(--muted)}
+section{display:grid;gap:22px}
+.sec-head{display:grid;gap:10px}
+.panel{background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:20px}
+
+/* ---------- top ---------- */
+.top{padding-top:36px;display:grid;gap:24px}
+.title-row{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:16px 32px}
+h1{font-size:clamp(3rem,9vw,6.4rem);font-weight:900;text-transform:uppercase;line-height:.88}
+h1 span{color:var(--accent)}
+.facts{display:flex;flex-wrap:wrap;gap:8px 22px;font-family:var(--mono);font-size:.82rem;color:var(--ink-2);max-width:min(560px,100%);min-width:0}
+.facts b{color:var(--ink);font-weight:600}
+.strip{display:flex;gap:10px;min-width:0;overflow-x:auto;padding-bottom:4px}
+.postcard{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:3/4;background:var(--photo);max-width:100%;flex:1 1 0;min-width:0}
+.postcard img{width:100%;height:100%;object-fit:cover}
+.postcard figcaption{position:absolute;inset:auto 0 0 0;padding:40px 12px 12px;background:linear-gradient(to top,rgba(4,14,16,.88),rgba(4,14,16,0));color:#fff;display:grid;gap:2px}
+.postcard .pc-name{font-family:var(--display);font-weight:800;font-size:1.6rem;text-transform:uppercase;line-height:1}
+.postcard .pc-line{font:500 .74rem var(--mono);color:#F4D38A}
+.pr-band{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px 28px;align-items:center;background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:16px 20px}
+.pr-band .big{font-family:var(--display);font-weight:900;font-size:2.6rem;line-height:.9}
+.pr-band p{font-size:.92rem;color:var(--ink-2);max-width:none}
+
+/* ---------- board ---------- */
+.board{background:var(--board);color:#E9F1EF;border-radius:10px;padding:14px 14px 10px;box-shadow:0 18px 40px -24px rgba(8,30,34,.55)}
+.board-head{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;padding:4px 6px 12px;border-bottom:1px solid var(--board-rule)}
+.board-head .lbl{font-family:var(--display);font-weight:800;font-size:1.4rem;letter-spacing:.06em;color:var(--flap)}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center}
+.seg{display:inline-flex;background:var(--board-row);border:1px solid var(--board-rule);border-radius:7px;padding:3px;gap:2px}
+.seg button{font:500 .78rem var(--mono);color:var(--flap-dim);background:transparent;border:0;padding:6px 10px;border-radius:5px;cursor:pointer;letter-spacing:.04em}
+.seg button[aria-pressed="true"]{background:var(--flap);color:#10222A;font-weight:600}
+.seg button:hover:not([aria-pressed="true"]){color:#fff}
+.ctl-lbl{font:500 .7rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--flap-dim)}
+.board-scroll{overflow-x:auto}
+table.dep{width:100%;border-collapse:separate;border-spacing:0 4px;min-width:700px}
+table.dep th{font:500 .68rem var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--flap-dim);text-align:left;padding:10px 10px 4px}
+table.dep td{background:var(--board-row);padding:8px 10px;font-family:var(--mono);font-size:.9rem;white-space:nowrap;vertical-align:middle}
+table.dep td:first-child{border-radius:6px 0 0 6px}
+table.dep td:last-child{border-radius:0 6px 6px 0}
+.flap{display:inline-flex;gap:2px}
+.flap i{font-style:normal;display:inline-grid;place-items:center;width:1.35em;height:1.7em;background:#1B3A41;border-radius:3px;color:var(--flap);font-weight:600;position:relative}
+.flap i::after{content:"";position:absolute;left:0;right:0;top:50%;border-top:1px solid rgba(0,0,0,.45)}
+.dep .city{display:flex;gap:10px;align-items:center;font-family:var(--body);font-weight:600;color:#fff}
+.dep .city img{width:42px;height:42px;border-radius:6px;object-fit:cover;background:#1B3A41;flex:none}
+.dep .city small{display:block;font-weight:400;color:var(--flap-dim);font-size:.76rem}
+.dep .cost{color:var(--flap);font-weight:600;font-size:1rem}
+.dep .fun{color:#fff}
+.dep .fun small{color:var(--flap-dim)}
+.funbar{display:inline-block;width:64px;height:6px;border-radius:3px;background:#1B3A41;vertical-align:middle;margin-left:8px;position:relative;overflow:hidden}
+.funbar b{position:absolute;inset:0 auto 0 0;background:var(--flap);border-radius:3px}
+.chip{display:inline-flex;align-items:center;gap:6px;font:600 .68rem var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:4px;white-space:nowrap}
+.chip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.chip.good{color:var(--good);background:var(--good-bg)}
+.chip.warn{color:var(--warn);background:var(--warn-bg)}
+.chip.bad{color:var(--bad);background:var(--bad-bg)}
+.board .chip.good{color:#57D68C;background:rgba(87,214,140,.12)}
+.board .chip.warn{color:#F4B63F;background:rgba(244,182,63,.12)}
+.board .chip.bad{color:#F2877A;background:rgba(242,135,122,.13)}
+.board-foot{font:400 .72rem var(--mono);color:var(--flap-dim);padding:8px 6px 2px}
+
+/* ---------- scatter ---------- */
+.scatter-wrap{overflow-x:auto}
+.scatter{width:100%;min-width:560px;height:auto;display:block}
+.scatter text{font-family:var(--mono)}
+.sc-legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.84rem;color:var(--ink-2);margin-bottom:6px}
+.sc-legend span{display:inline-flex;align-items:center;gap:7px}
+.sc-legend i{width:12px;height:12px;border-radius:50%;display:inline-block}
+.scatter circle{cursor:default}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-top:16px}
+.safety-list{display:grid;gap:0}
+.safety-row{display:grid;grid-template-columns:150px 150px minmax(0,1fr);gap:14px;padding:12px 0;border-bottom:1px solid var(--rule);align-items:start;font-size:.88rem}
+.safety-row:last-child{border-bottom:0}
+.safety-row b{font-weight:600}
+.safety-row p{color:var(--ink-2)}
+.rules{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 24px;margin-top:4px}
+.rules li{font-size:.9rem;color:var(--ink-2);margin-bottom:4px}
+.readout div{border-top:2px solid var(--ink);padding-top:10px;display:grid;gap:4px}
+.readout b{font-family:var(--display);font-size:1.35rem;text-transform:uppercase;font-weight:800}
+.readout span{font-size:.88rem;color:var(--ink-2)}
+
+/* ---------- heat scorecard ---------- */
+table.heat{width:100%;border-collapse:separate;border-spacing:3px;min-width:760px;font-size:.88rem}
+table.heat th{font:500 .66rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:center;padding:0}
+table.heat th:first-child{text-align:left}
+table.heat th button{all:unset;cursor:pointer;display:flex;justify-content:center;gap:4px;align-items:center;padding:8px 6px;width:100%;box-sizing:border-box}
+table.heat th:first-child button{justify-content:flex-start}
+table.heat th button:hover,table.heat th[aria-sort] button{color:var(--ink)}
+table.heat td{padding:10px 8px;text-align:center;border-radius:5px;font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums}
+table.heat td.dn{text-align:left;font-family:var(--body);white-space:nowrap;display:flex;gap:10px;align-items:center}
+table.heat td.dn img{width:36px;height:36px;border-radius:6px;object-fit:cover;background:var(--photo)}
+table.heat td.dn small{display:block;font-weight:400;color:var(--muted);font-size:.74rem}
+table.heat td.tot{background:var(--sunk)}
+
+/* ---------- cost bars ---------- */
+.chart-top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px 24px;align-items:center;margin-bottom:14px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.84rem;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.light-controls .seg{background:var(--sunk);border-color:var(--rule)}
+.light-controls .seg button{color:var(--ink-2)}
+.light-controls .seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.light-controls .seg button:hover:not([aria-pressed="true"]){color:var(--ink)}
+.light-controls .ctl-lbl{color:var(--muted)}
+.bars{display:grid;gap:10px;position:relative}
+.bar-row{display:grid;grid-template-columns:150px minmax(0,1fr) 64px;gap:12px;align-items:center}
+.bar-row .nm{font-weight:600;font-size:.9rem;line-height:1.2}
+.bar-row .nm small{display:block;color:var(--muted);font-weight:400;font-size:.74rem}
+.track{position:relative;height:26px}
+.stack{position:absolute;inset:0 auto 0 0;display:flex;gap:2px;height:100%;width:100%}
+.stack b{display:block;height:100%;min-width:2px}
+.stack b:last-child{border-radius:0 4px 4px 0}
+.stack b:hover{filter:brightness(1.1)}
+.total{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:600;font-size:.9rem;text-align:right}
+.axis{display:grid;grid-template-columns:150px minmax(0,1fr) 64px;gap:12px;margin-top:4px}
+.axis .ticks{position:relative;height:18px;font:400 .7rem var(--mono);color:var(--muted)}
+.axis .ticks span{position:absolute;transform:translateX(-50%)}
+.gridlines{position:absolute;top:0;bottom:0;pointer-events:none}
+.gridlines span{position:absolute;top:0;bottom:0;border-left:1px dashed var(--rule)}
+.gridlines span.line-budget{border-left:2px solid var(--ink)}
+.gridlines span.line-pr{border-left:2px dashed var(--bad)}
+.gridlines em{position:absolute;top:-20px;transform:translateX(-50%);font:600 .66rem var(--mono);font-style:normal;white-space:nowrap;background:var(--paper);padding:0 4px}
+.tip{position:fixed;pointer-events:none;z-index:10;background:var(--ink);color:var(--paper);font:500 .78rem var(--mono);padding:7px 9px;border-radius:6px;white-space:nowrap}
+details summary{cursor:pointer;font-weight:600;font-size:.88rem;color:var(--accent)}
+.tbl-scroll{overflow-x:auto;margin-top:10px}
+table.plain{width:100%;border-collapse:collapse;font-size:.86rem;min-width:620px}
+table.plain th,table.plain td{padding:8px 10px;border-bottom:1px solid var(--rule);text-align:right;white-space:nowrap}
+table.plain th:first-child,table.plain td:first-child{text-align:left}
+table.plain th{font:500 .68rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+table.plain td{font-family:var(--mono);font-variant-numeric:tabular-nums}
+table.plain td:first-child{font-family:var(--body);font-weight:600}
+
+/* ---------- dossiers ---------- */
+.filter{display:flex;flex-wrap:wrap;gap:8px}
+.filter button{font:500 .8rem var(--body);border:1px solid var(--rule);background:var(--paper);color:var(--ink-2);padding:6px 12px;border-radius:999px;cursor:pointer}
+.filter button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.dossiers{display:grid;gap:28px}
+.dos{background:var(--paper);border:1px solid var(--rule);border-radius:12px;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
+.dos-photo{position:relative;min-height:420px;background:var(--photo)}
+.dos-photo > img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.dos-photo .over{position:absolute;inset:auto 0 0 0;padding:70px 22px 20px;background:linear-gradient(to top,rgba(4,14,16,.9),rgba(4,14,16,0));color:#fff;display:grid;gap:8px}
+.dos-photo h3{font-size:clamp(2.2rem,5vw,3.4rem);font-weight:900}
+.dos-photo .sub{font:500 .8rem var(--mono);color:#F4D38A;letter-spacing:.04em}
+.dos-photo .inset{position:absolute;top:14px;right:14px;width:38%;aspect-ratio:4/3;border-radius:8px;overflow:hidden;border:3px solid #fff;box-shadow:0 10px 24px -10px rgba(0,0,0,.6);background:var(--photo);transform:rotate(2deg)}
+.dos-photo .inset img{width:100%;height:100%;object-fit:cover}
+.dos-body{padding:20px 22px 22px;display:grid;gap:16px;align-content:start}
+.dos-meta{display:flex;flex-wrap:wrap;gap:6px}
+.dos-body .vibe{color:var(--ink-2);font-size:.95rem}
+.funrow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.funrow div{background:var(--sunk);border-radius:6px;padding:8px 6px;text-align:center;display:grid;gap:2px}
+.funrow b{font:600 1.05rem var(--mono)}
+.funrow span{font:500 .6rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.day{display:grid;gap:0;border-left:2px solid var(--accent);margin-left:4px}
+.day div{display:grid;grid-template-columns:52px minmax(0,1fr);gap:10px;padding:3px 0 3px 12px;font-size:.88rem}
+.day span{font:600 .74rem var(--mono);color:var(--accent);padding-top:2px}
+.four{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.mini h4{margin:0 0 6px;font:600 .68rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.mini ul{margin:0;padding-left:16px;font-size:.85rem;display:grid;gap:3px}
+.stays{display:grid;border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+.stays div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:7px 12px;font-size:.84rem;border-bottom:1px solid var(--rule)}
+.stays div:last-child{border-bottom:0}
+.stays span.num{font-weight:600}
+.stays small{display:block;color:var(--muted);font-size:.74rem}
+.proscons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;font-size:.85rem}
+.proscons ul{margin:0;padding-left:16px;display:grid;gap:4px;color:var(--ink-2)}
+.proscons h4{margin:0 0 6px;font:600 .68rem var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.tag-good{color:var(--good)} .tag-bad{color:var(--bad)}
+.links{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:.84rem;font-weight:600}
+
+/* ---------- picks ---------- */
+.picks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.pick{background:var(--paper);border:1px solid var(--rule);border-radius:12px;overflow:hidden;display:grid;grid-template-rows:auto 1fr}
+.pick.first{border:2px solid var(--accent)}
+.pick .pimg{aspect-ratio:16/10;background:var(--photo);position:relative;max-width:100%}
+.pick .pimg img{width:100%;height:100%;object-fit:cover}
+.pick .rank{position:absolute;top:12px;left:12px;font:600 .7rem var(--mono);letter-spacing:.1em;text-transform:uppercase;background:var(--paper);color:var(--ink);padding:5px 8px;border-radius:4px}
+.pick .pbody{padding:18px;display:grid;gap:10px;align-content:start}
+.pick h3{font-size:2rem}
+.pick .stats{display:flex;flex-wrap:wrap;gap:6px 16px;font:600 .9rem var(--mono)}
+.pick .stats small{font-weight:400;color:var(--muted)}
+.pick ul{margin:0;padding-left:18px;display:grid;gap:6px;font-size:.9rem;color:var(--ink-2)}
+.alsos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.also{display:grid;grid-template-columns:88px minmax(0,1fr);gap:14px;align-items:center;background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:10px}
+.also img{width:88px;height:88px;object-fit:cover;border-radius:7px;background:var(--photo)}
+.also b{font-family:var(--display);font-size:1.3rem;text-transform:uppercase}
+.also p{font-size:.86rem;color:var(--ink-2)}
+
+/* ---------- small print ---------- */
+.smallprint{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
+.fixlist{display:grid;gap:12px}
+.fixlist div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 14px;padding-bottom:12px;border-bottom:1px solid var(--rule)}
+.fixlist div:last-child{border-bottom:0;padding-bottom:0}
+.fixlist b{font-size:.95rem}
+.fixlist p{grid-column:1/-1;font-size:.86rem;color:var(--ink-2)}
+.fixlist .num{font-size:.8rem;color:var(--ink-2)}
+.visa-mini{display:grid;gap:6px}
+.visa-mini div{display:grid;grid-template-columns:130px minmax(0,1fr);gap:10px;align-items:center;font-size:.86rem}
+.callout{border-left:3px solid var(--accent);padding:4px 0 4px 14px;font-size:.86rem;color:var(--ink-2)}
+.check ol{margin:8px 0 0;padding-left:20px;display:grid;gap:6px;font-size:.86rem;color:var(--ink-2)}
+.timeline{display:grid;border-left:2px solid var(--rule);margin-left:6px}
+.tl{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;padding:0 0 18px 20px;position:relative}
+.tl::before{content:"";position:absolute;left:-7px;top:5px;width:12px;height:12px;border-radius:50%;background:var(--paper);border:2px solid var(--accent)}
+.tl.now::before{background:var(--accent)}
+.tl .when{font:600 .78rem var(--mono);color:var(--ink)}
+.tl p{font-size:.92rem;color:var(--ink-2)}
+.tl p strong{color:var(--ink)}
+.sources{columns:2;column-gap:32px;font-size:.8rem;color:var(--muted);padding-left:18px;margin:0}
+.sources li{break-inside:avoid;margin-bottom:6px}
+footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--rule);padding-top:18px}
+
+@media (max-width:900px){
+  .strip{scroll-snap-type:x mandatory}
+  .postcard{flex:0 0 190px;scroll-snap-align:start}
+  .dos{grid-template-columns:1fr}
+  .dos-photo{min-height:320px}
+  .picks,.smallprint,.alsos,.readout{grid-template-columns:1fr}
+  .sources{columns:1}
+}
+@media (max-width:560px){
+  body{padding-inline:16px}
+  .wrap{gap:60px}
+  .four,.proscons{grid-template-columns:1fr}
+  .funrow{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+  .funrow span{font-size:.52rem}
+  .bar-row,.axis{grid-template-columns:96px minmax(0,1fr) 52px;gap:8px}
+  .bar-row .nm small{display:none}
+  .tl{grid-template-columns:1fr;gap:4px}
+  .pr-band{grid-template-columns:1fr}
+  .visa-mini div{grid-template-columns:1fr;gap:2px}
+  .gridlines em{font-size:.6rem}
+}
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <div class="eyebrow">F&amp;M crew · spring recess 2027 · plan v2, researched Sep 2026</div>
+  <div class="title-row">
+    <h1>Where to,<br><span>March '27?</span></h1>
+    <div class="facts">
+      <span>Out <b>Fri Mar 12, 4:30pm</b></span>
+      <span>Back by <b>Mon Mar 22</b></span>
+      <span>Priced <b>Sat 13 to Sun 21 · 8 nights</b></span>
+      <span>Flying <b>PHL</b></span>
+      <span>Target <b>$1,600 pp all in</b></span>
+      <span><b>15 options</b>, 5 of them in the USA</span>
+      <span>Skipping <b>Cancún, Puerto Rico</b></span>
+      <span>Drinking age: <b>18 abroad, 21 in the US mainland</b></span>
+    </div>
+  </div>
+  <div class="strip" id="strip"></div>
+  <div class="pr-band">
+    <div><div class="eyebrow">PR 2026</div><div class="big num">~$2,000</div></div>
+    <p>Last year's Condado setup was the dream: beach at the door, La Placita and Old San Juan a short ride away. The Airbnb cost way too much and nobody cleaned. The question this page answers: <strong>where do we get the most beach, clubs, bars and vibe for every dollar</strong>, in a place that is actually safe and where we can all drink. Puerto Rico was US soil, so US options are on the board too, including the US Virgin Islands, where the drinking age is also 18.</p>
+  </div>
+</header>
+
+<div class="board" aria-label="Destination departures board">
+  <div class="board-head">
+    <div class="lbl">DEPARTURES · SORTED BY FUN PER DOLLAR</div>
+    <div class="controls">
+      <span class="ctl-lbl">People</span>
+      <div class="seg" role="group" aria-label="Group size" data-ctl="n">
+        <button type="button" id="n6" data-v="6" aria-pressed="true">6</button>
+        <button type="button" id="n7" data-v="7" aria-pressed="false">7</button>
+        <button type="button" id="n8" data-v="8" aria-pressed="false">8</button>
+      </div>
+      <span class="ctl-lbl">Stay</span>
+      <div class="seg" role="group" aria-label="Stay type" data-ctl="mode">
+        <button type="button" id="m-airbnb" data-v="airbnb" aria-pressed="true">Airbnb + cleaner</button>
+        <button type="button" id="m-hotel" data-v="hotel" aria-pressed="false">Hotel</button>
+        <button type="button" id="m-ai" data-v="ai" aria-pressed="false">All-inclusive</button>
+      </div>
+    </div>
+  </div>
+  <div class="board-scroll">
+    <table class="dep">
+      <thead><tr><th>Gate</th><th>Destination</th><th>Fun score</th><th>Est. pp all in</th><th>Fun per $1k</th><th>Safety</th><th>Drink at</th><th>Budget</th></tr></thead>
+      <tbody id="board"></tbody>
+    </table>
+  </div>
+  <div class="board-foot" id="board-foot"></div>
+</div>
+
+<section id="value">
+  <div class="sec-head">
+    <div class="eyebrow">The main question</div>
+    <h2>Most fun for the money</h2>
+    <p class="lede">Every place gets a <strong>fun score out of 50</strong>: beaches, clubs, bars and pubs, cafés and food, and overall vibe, each out of 10. Up means more fun. Left means cheaper. The top left corner is where we want to be. <strong>Dot colour is safety</strong>, so a cheap and fun red dot is exactly the trade we have to argue about.</p>
+  </div>
+  <div class="panel">
+    <div class="sc-legend"><span><i style="background:var(--good)"></i>Safe: Level 2 or USA</span><span><i style="background:var(--warn)"></i>Level 3 state, or known theft</span><span><i style="background:var(--bad)"></i>Level 3 plus a drugging surge</span><span class="note">Thick ring: my top 3 · solid line: $1,600 target · dashed: PR's $2,000</span></div>
+    <div class="scatter-wrap"><svg class="scatter" id="scatter" viewBox="0 0 760 460" role="img" aria-label="Scatter chart of cost per person against fun score"></svg></div>
+    <div class="readout" id="readout"></div>
+  </div>
+</section>
+
+<section id="scorecard">
+  <div class="sec-head">
+    <div class="eyebrow">Where the fun comes from</div>
+    <h2>The fun breakdown</h2>
+    <p class="lede">Darker cells mean better. These are my calls from nightlife guides and traveller reviews, so argue with them in the chat. Click a column to sort.</p>
+  </div>
+  <div class="panel" style="overflow-x:auto;padding:10px 12px">
+    <table class="heat" id="heat"></table>
+  </div>
+</section>
+
+<section id="places">
+  <div class="sec-head">
+    <div class="eyebrow">The 10 options</div>
+    <h2>What a day there actually looks like</h2>
+    <p class="lede">Beaches, clubs, bars and cafés for each place, a sample day, and the stay that keeps us near all of it. Airbnb links open live search with our dates and group size.</p>
+  </div>
+  <div class="filter" role="group" aria-label="Filter destinations">
+    <button type="button" id="f-all" data-f="all" aria-pressed="true">All 15</button>
+    <button type="button" id="f-value" data-f="value" aria-pressed="false">Best value</button>
+    <button type="button" id="f-safe" data-f="safe" aria-pressed="false">Safety 7+</button>
+    <button type="button" id="f-18" data-f="age18" aria-pressed="false">Drink at 18</button>
+    <button type="button" id="f-usa" data-f="usa" aria-pressed="false">USA, no passport</button>
+    <button type="button" id="f-budget" data-f="budget" aria-pressed="false">Under $1,600</button>
+    <button type="button" id="f-beach" data-f="beach" aria-pressed="false">Beach 8+</button>
+    <button type="button" id="f-party" data-f="party" aria-pressed="false">Clubs 8+</button>
+    <button type="button" id="f-friends" data-f="friends" aria-pressed="false">Friends asked for</button>
+  </div>
+  <div class="dossiers" id="dossiers"></div>
+</section>
+
+<section id="cost">
+  <div class="sec-head">
+    <div class="eyebrow">Where the money goes</div>
+    <h2>Cost per person, itemised</h2>
+    <p class="lede">Flights, stay, cleaning, food and drinks, plus nights out and a couple of group activities. Group size and stay type follow the board.</p>
+  </div>
+  <div class="panel">
+    <div class="chart-top">
+      <div class="legend" id="legend"></div>
+      <div class="controls light-controls">
+        <span class="ctl-lbl">People</span>
+        <div class="seg" role="group" aria-label="Group size" data-ctl="n">
+          <button type="button" id="cn6" data-v="6" aria-pressed="true">6</button>
+          <button type="button" id="cn7" data-v="7" aria-pressed="false">7</button>
+          <button type="button" id="cn8" data-v="8" aria-pressed="false">8</button>
+        </div>
+      </div>
+    </div>
+    <div style="position:relative;padding-top:22px"><div class="bars" id="bars"></div></div>
+    <div class="axis"><div></div><div class="ticks" id="ticks"></div><div></div></div>
+    <p class="note" style="margin-top:12px">Estimates as of Sep 2026. Flights use Kayak's 12 month route averages with a spring break week bump. Stays are typical rates for 3 to 4 bedroom places in the neighbourhood on each card. Real quotes come when we search with dates.</p>
+    <details style="margin-top:12px"><summary>Show the numbers as a table</summary><div class="tbl-scroll"><table class="plain" id="breakdown"></table></div></details>
+  </div>
+</section>
+
+<section id="pick">
+  <div class="sec-head">
+    <div class="eyebrow">My call</div>
+    <h2>The top 3</h2>
+    <p class="lede">Ranked on fun per dollar, but a beach has to be part of it.</p>
+  </div>
+  <div class="picks" id="picks"></div>
+  <div class="alsos" id="alsos"></div>
+  <div class="panel" style="overflow-x:auto">
+    <h3 style="font-size:1.2rem;margin-bottom:6px">Stay type showdown for the top 3</h3>
+    <p class="note" style="margin-bottom:6px">Per person, all in, at the group size selected on the board.</p>
+    <table class="plain" id="showdown"></table>
+  </div>
+</section>
+
+<section id="safety">
+  <div class="sec-head">
+    <div class="eyebrow">You asked about this</div>
+    <h2>How safe each one actually is</h2>
+    <p class="lede">You heard Colombia is unsafe. That's broadly right on paper: the US State Department has Colombia at <strong>Level 3, reconsider travel</strong>, and Medellín is dealing with a scopolamine drugging surge aimed at foreigners. That doesn't make Cartagena off limits, but it does mean the cheapest fun on this board comes with real rules attached.</p>
+  </div>
+  <div class="panel">
+    <p style="margin-bottom:10px"><strong>What the levels mean:</strong> Level 1 is normal precautions, Level 2 is increased caution, Level 3 is reconsider travel, Level 4 is do not travel. Ratings are national, so a Level 3 country can still have tourist districts that are busy and policed. US destinations get no rating at all, which is not the same as no crime.</p>
+    <div class="safety-list" id="safety-list"></div>
+  </div>
+  <div class="panel">
+    <h3 style="font-size:1.2rem;margin-bottom:8px">The rules that actually keep us safe</h3>
+    <ul class="rules">
+      <li>Watch every drink get poured, and never take one from a stranger. This is the single biggest risk in Cartagena and Medellín.</li>
+      <li>Nobody leaves a bar with someone they met that night. Drugging robberies almost always start that way.</li>
+      <li>Taxis or Uber after dark, never walking back, in Negril, Cartagena and Medellín.</li>
+      <li>Split cash, cards and a phone between two people. Carry an old phone on Rio's beaches.</li>
+      <li>Stay in the zones named on each card. The ratings are about places we won't be going.</li>
+      <li>Share locations in the group chat for the week, and agree nobody walks off alone.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="smallprint">
+  <div class="sec-head">
+    <div class="eyebrow">The boring but important bit</div>
+    <h2>Keep the house clean, get through the airport</h2>
+  </div>
+  <div class="smallprint">
+    <div class="panel fixlist">
+      <div><b>Pick a place with a housekeeper</b><span class="num">$0, tip ~$60</span><p>Common in Cartagena colonial houses and Negril villas. Filter Airbnb for "housekeeper" or "cleaning included."</p></div>
+      <div><b>Or book 3 cleaner visits</b><span class="num">$25 to $70 each</span><p>Ask the host before paying: "Can your cleaner come Mon, Wed, Fri?" Get it in the Airbnb chat. Already counted in every price here.</p></div>
+      <div><b>Or go all-inclusive</b><span class="num">$110 to $190 pp/night</span><p>Daily housekeeping and open bar, but we lose a walkable neighbourhood. Punta Cana, Cabo, Vallarta, Nassau and Negril.</p></div>
+      <div><b>House kitty</b><span class="num">$40 pp</span><p>Covers cleaner tips, trash bags and the first grocery and alcohol run.</p></div>
+    </div>
+    <div class="panel check">
+      <div class="visa-mini" id="visa-mini"></div>
+      <p class="callout" style="margin-top:14px"><strong>Expired F-1 stamp?</strong> For trips under 30 days, Mexico, DR, Jamaica and the Bahamas let F-1 students back into the US on an expired stamp (automatic revalidation). But Mexico, DR and the Bahamas need a valid US visa to let you in, so with an expired stamp only Jamaica works. Confirm with the DSO.</p>
+      <details style="margin-top:10px"><summary>Everyone's checklist</summary>
+        <ol>
+          <li>Passport valid past Sep 22, 2027</li>
+          <li>F-1 stamp valid on Mar 21, 2027 (unless going to Jamaica)</li>
+          <li>I-20 travel signature from F&amp;M international student services, within 12 months</li>
+          <li>Brazil only: consular visa, apply 8+ weeks ahead</li>
+        </ol>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section id="timeline">
+  <div class="sec-head">
+    <div class="eyebrow">Getting ahead of it</div>
+    <h2>Booking timeline</h2>
+  </div>
+  <div class="timeline">
+    <div class="tl now"><div class="when">Now to Oct 15</div><p><strong>Argue in the chat.</strong> Everyone checks passport and visa dates at the same time.</p></div>
+    <div class="tl"><div class="when">By Oct 31</div><p><strong>Vote and commit.</strong> One destination plus a backup. Everyone sets a Google Flights alert for PHL, EWR and BWI, Mar 13 to 21.</p></div>
+    <div class="tl"><div class="when">Nov to mid Dec</div><p><strong>Book flights together.</strong> Spring break week fares climb after the holidays.</p></div>
+    <div class="tl"><div class="when">Same week</div><p><strong>Lock the stay.</strong> Flexible or moderate cancellation, and the cleaner schedule confirmed in writing.</p></div>
+    <div class="tl"><div class="when">January</div><p><strong>Paperwork.</strong> I-20 signatures, Brazil visas if Rio, travel insurance.</p></div>
+    <div class="tl"><div class="when">February</div><p><strong>Plan the days.</strong> Book the boat day and any club tables. Collect the house kitty.</p></div>
+    <div class="tl"><div class="when">Fri Mar 12</div><p><strong>Out.</strong> Amtrak Lancaster to 30th St, SEPTA to PHL, Saturday morning flights.</p></div>
+  </div>
+</section>
+
+<section id="sources">
+  <div class="sec-head">
+    <div class="eyebrow">Receipts</div>
+    <h2 style="font-size:1.8rem">Sources and photo credits</h2>
+    <p class="note">All checked Sep 14 to 15, 2026. Prices and visa rules change, so recheck before booking. Fun scores are judgement calls from the guides below. Venue names come from local guides, so check opening status before going.</p>
+  </div>
+  <ol class="sources">
+    <li><a href="https://www.fandm.edu/_resources/pdfs/2026-27-Official-FM-Calendar.pdf">F&amp;M Official Calendar 2026-27</a></li>
+    <li><a href="https://www.kayak.com/flight-routes/Philadelphia-PHL/Cartagena-Rafael-Nunez-CTG">Kayak PHL to CTG</a>, <a href="https://www.kayak.com/flight-routes/Philadelphia-PHL/Punta-Cana-PUJ">PUJ</a>, <a href="https://www.kayak.com/flight-routes/Philadelphia-PHL/Los-Cabos-SJD">SJD</a>, <a href="https://www.kayak.com/flight-routes/Philadelphia-PHL/Puerto-Vallarta-PVR">PVR</a>, <a href="https://www.kayak.com/flight-routes/Philadelphia-PHL/Medellin-Jose-Maria-Cordova-MDE">MDE</a></li>
+    <li><a href="https://www.kayak.com/flight-routes/Philadelphia-PHL/Rio-de-Janeiro-Galeao-GIG">Kayak PHL to GIG</a>, <a href="https://www.kayak.com/flight-routes/Philadelphia-PHL/Lima-Jorge-Chavez-LIM">LIM</a>, <a href="https://www.kayak.com/flight-routes/Philadelphia-PHL/Nassau-Lynden-Pindling-NAS">NAS</a>, <a href="https://www.kayak.com/flight-routes/Philadelphia-PHL/Liberia-LIR">LIR</a>, <a href="https://www.kayak.com/flight-routes/Philadelphia-PHL/Montego-Bay-Sangster-MBJ">MBJ</a></li>
+    <li><a href="https://thecartagena.guide/cartagena-nightlife-guide/">Cartagena nightlife 2026</a>, <a href="https://www.hostelworld.com/blog/cartagena-nightlife-where-locals-and-travellers-go-out/">Hostelworld Cartagena</a></li>
+    <li><a href="https://everythingpuntacana.com/things-to-do/punta-cana-nightlife/">Punta Cana nightlife</a>, <a href="https://www.puntacanatravelblog.com/general-information-faq/seaweed-punta-cana-sargassum/">seaweed season</a></li>
+    <li><a href="https://www.inertiatours.com/cabo-san-lucas-spring-break/">Cabo spring break</a>, <a href="https://mexiconewsdaily.com/travel/the-evolution-of-spring-break-in-los-cabos/">Mexico News Daily on Los Cabos</a></li>
+    <li><a href="https://www.goatsontheroad.com/puerto-vallarta-nightlife/">Puerto Vallarta nightlife</a>, <a href="https://visitpuertovallarta.com/blog/where-to-stay-in-puerto-vallarta-a-guide-to-romantic-zone-hotels/">Romantic Zone</a></li>
+    <li><a href="https://colombiamove.com/blog/nightlife-medellin-bars-clubs-guide/">Medellín nightlife</a>, <a href="https://ownerscirclemedellin.com/guide/is-medellin-safe-at-night/">Medellín at night</a></li>
+    <li><a href="https://www.indietraveller.co/mancora-travel-guide/">Máncora guide</a>, <a href="https://www.rome2rio.com/s/Lima/M%C3%A1ncora">Lima to Máncora</a></li>
+    <li><a href="https://www.priceline.com/hotel-deals/en-us/P5000494493/H46052804/riu-republica-adults-only-all-inclusive.ssp">Riu Republica rates</a>, <a href="https://thelatinvestor.com/blogs/news/cartagena-airbnb">Cartagena Airbnb rates</a>, <a href="https://www.airdna.co/vacation-rental-data/app/mx/default/cabo-san-lucas/overview">Cabo rental data</a></li>
+    <li><a href="https://www.happyfares.in/blog/us-visa-cascade-28-countries-indians-2026/">US visa cascade for Indian passports</a>, <a href="https://apply.joinsherpa.com/visa/jamaica/indian-citizens">Jamaica</a>, <a href="https://btwvisas.com/visa-guide/brazil-visa">Brazil</a>, <a href="https://btwvisas.com/visa-guide/dominican-republic-visa/">DR</a></li>
+    <li><a href="https://isso.columbia.edu/content/returning-canada-mexico-and-adjacent-caribbean-islands">Automatic revalidation (Columbia ISSO)</a></li>
+    <li><a href="https://co.usembassy.gov/travel-advisory-colombia-march-2026/">Colombia travel advisory, US Embassy Bogotá</a>, <a href="https://www.rollingstone.com/culture/culture-features/scopolamine-mind-control-drug-colombia-1235592811/">Rolling Stone on scopolamine robberies</a></li>
+    <li><a href="https://www.cbsnews.com/news/miami-beach-spring-break-commercial-new-rules-imposing-curfew-tsa-travel-is-up/">Miami Beach spring break rules</a>, <a href="https://www.timeout.com/miami/news/spring-break-in-miami-all-the-rules-the-city-will-implement-next-month-021126">Time Out on Miami 2026 rules</a></li>
+    <li><a href="https://www.wtvy.com/2026/03/11/beach-alcohol-ban-curfew-among-new-panama-city-beach-spring-break-rules/">Panama City Beach alcohol ban and curfew</a>, <a href="https://bayso.org/spring-break-notice/">Bay County Sheriff spring break notice</a></li>
+    <li><a href="https://caribbeanuncovered.com/us-virgin-islands-drinking-age/">US Virgin Islands drinking age 18</a>, <a href="https://www.insureyonder.com/how-to-travel-to-the-u-s-virgin-islands-safely/">USVI safety guidance</a></li>
+    <li><a href="https://www.kayak.com/flight-routes/Philadelphia-PHL/Miami-MIA">Kayak PHL to MIA</a>, <a href="https://www.kayak.com/flight-routes/Philadelphia-PHL/St-Thomas-STT">STT</a>, <a href="https://www.kayak.com/flight-routes/Philadelphia-PHL/Key-West-EYW">EYW</a>, <a href="https://www.kayak.com/flight-routes/Philadelphia-PHL/Panama-City-ECP">ECP</a>, <a href="https://www.kayak.com/flight-routes/Philadelphia-PHL/Harlingen-HRL">HRL</a></li>
+  </ol>
+  <details><summary>Photo credits (Wikimedia Commons)</summary><ol class="sources" id="credits" style="margin-top:10px"></ol></details>
+</section>
+
+<footer>Built for the group chat. Numbers are planning estimates, not quotes.</footer>
+</div>
+
+<div class="tip" id="tip" hidden></div>
+
+<script>
+const NIGHTS = 8, DAYS = 9, GROUND = 40, BUDGET = 1600, PR = 2000;
+const CHECKIN = "2027-03-13", CHECKOUT = "2027-03-21";
+/* filled after photo selection: id-a = day/beach, id-b = night/street */
+const CREDITS = {"ctg-a": {"alt": "Getsemani Street Scene, Cartagena, Colombia (23957465034)", "artist": "Joe Ross from Lansing, Michigan", "license": "CC BY-SA 2.0", "page": "https://commons.wikimedia.org/wiki/File:Getsemani_Street_Scene,_Cartagena,_Colombia_(23957465034).jpg"}, "ctg-b": {"alt": "Atardecer en Cartagena de Indias desde La Popa.", "artist": "Norma Gòmez", "license": "CC BY 2.0", "page": "https://commons.wikimedia.org/wiki/File:Atardecer_en_Cartagena_de_Indias_desde_La_Popa..jpg"}, "puj-a": {"alt": "Bavaro Beach 045", "artist": "Hans Buch", "license": "Public domain", "page": "https://commons.wikimedia.org/wiki/File:Bavaro_Beach_045.jpg"}, "puj-b": {"alt": "2024 - Bávaro Beach - 39", "artist": "Oleg Yunakov", "license": "CC BY-SA 4.0", "page": "https://commons.wikimedia.org/wiki/File:2024_-_B%C3%A1varo_Beach_-_39.jpg"}, "pvr-a": {"alt": "Puerto Vallarta, Jalisco, 2025 - 004", "artist": "Another Believer", "license": "CC BY-SA 4.0", "page": "https://commons.wikimedia.org/wiki/File:Puerto_Vallarta,_Jalisco,_2025_-_004.jpg"}, "pvr-b": {"alt": "March 2023 in Puerto Vallarta, Jalisco - 029", "artist": "Another Believer", "license": "CC BY-SA 4.0", "page": "https://commons.wikimedia.org/wiki/File:March_2023_in_Puerto_Vallarta,_Jalisco_-_029.jpg"}, "sjd-a": {"alt": "TheArchCaboSanLucas05", "artist": "Thelmadatter", "license": "CC BY-SA 4.0", "page": "https://commons.wikimedia.org/wiki/File:TheArchCaboSanLucas05.JPG"}, "sjd-b": {"alt": "Medano lands end", "artist": "Cristo Vlahos", "license": "CC BY-SA 4.0", "page": "https://commons.wikimedia.org/wiki/File:Medano_lands_end.jpeg"}, "mde-a": {"alt": "El poblado, Medellín", "artist": "william gil", "license": "CC BY 2.0", "page": "https://commons.wikimedia.org/wiki/File:El_poblado,_Medell%C3%ADn.jpg"}, "mde-b": {"alt": "Piedra y Embalse del Peñol desde dron 05", "artist": "Juan Gómez", "license": "CC BY 2.0", "page": "https://commons.wikimedia.org/wiki/File:Piedra_y_Embalse_del_Pe%C3%B1ol_desde_dron_05.jpg"}, "gig-a": {"alt": "1 ipanema beach vidigal sunset", "artist": "chensiyuan", "license": "CC BY-SA 4.0", "page": "https://commons.wikimedia.org/wiki/File:1_ipanema_beach_vidigal_sunset.jpg"}, "gig-b": {"alt": "Pedra do Arpoador RJ 04", "artist": "Deniltonlima", "license": "CC BY-SA 3.0", "page": "https://commons.wikimedia.org/wiki/File:Pedra_do_Arpoador_RJ_04.jpg"}, "pe-a": {"alt": "Máncora Beach", "artist": "Melissamarzo", "license": "CC BY-SA 4.0", "page": "https://commons.wikimedia.org/wiki/File:M%C3%A1ncora_Beach.jpg"}, "pe-b": {"alt": "Mancora en la calle", "artist": "Charles Gadbois", "license": "CC BY 3.0", "page": "https://commons.wikimedia.org/wiki/File:Mancora_en_la_calle.JPG"}, "nas-a": {"alt": "Bahamas 1988 (059) New Providence Cable Beach (22762816374)", "artist": "Rüdiger Stehn from Kiel, Deutschland", "license": "CC BY-SA 2.0", "page": "https://commons.wikimedia.org/wiki/File:Bahamas_1988_(059)_New_Providence_Cable_Beach_(22762816374).jpg"}, "nas-b": {"alt": "Bahamas 1988 (057) New Providence Cable Beach (23315554181)", "artist": "Rüdiger Stehn from Kiel, Deutschland", "license": "CC BY-SA 2.0", "page": "https://commons.wikimedia.org/wiki/File:Bahamas_1988_(057)_New_Providence_Cable_Beach_(23315554181).jpg"}, "lir-a": {"alt": "Costa Rica Playa Tamarindo and Rivermouth 2007 Aerial Photograph Tamarindowiki 01", "artist": "Tamarindowiki", "license": "CC BY-SA 3.0", "page": "https://commons.wikimedia.org/wiki/File:Costa_Rica_Playa_Tamarindo_and_Rivermouth_2007_Aerial_Photograph_Tamarindowiki_01.JPG"}, "lir-b": {"alt": "Tamarindo - Costa Rica (50904837656)", "artist": "Rômulo Gama Ferreira from Vitória-ES", "license": "CC BY 2.0", "page": "https://commons.wikimedia.org/wiki/File:Tamarindo_-_Costa_Rica_(50904837656).jpg"}, "mbj-a": {"alt": "Ricks Negril Jamaica Photo Don Ramey Logan", "artist": "Don Ramey Logan", "license": "CC BY-SA 3.0", "page": "https://commons.wikimedia.org/wiki/File:Ricks_Negril_Jamaica_Photo_Don_Ramey_Logan.jpg"}, "mbj-b": {"alt": "Jamaica, Negril - Flickr - VV Nincic", "artist": "VV Nincic from Toronto, Canada", "license": "CC BY 2.0", "page": "https://commons.wikimedia.org/wiki/File:Jamaica,_Negril_-_Flickr_-_VV_Nincic.jpg"}, "mia-a": {"alt": "Lifeguard stand, Miami Beach", "artist": "Radomianin", "license": "CC BY-SA 4.0", "page": "https://commons.wikimedia.org/wiki/File:Lifeguard_stand,_Miami_Beach.jpg"}, "mia-b": {"alt": "Boulevard Hotel (Neon sign), Miami Beach", "artist": "Photograph: Radomianin", "license": "Public domain", "page": "https://commons.wikimedia.org/wiki/File:Boulevard_Hotel_(Neon_sign),_Miami_Beach.jpg"}, "stt-a": {"alt": "Magen's Bay, St. Thomas - panoramio (1)", "artist": "socaltraveler", "license": "CC BY-SA 3.0", "page": "https://commons.wikimedia.org/wiki/File:Magen%27s_Bay,_St._Thomas_-_panoramio_(1).jpg"}, "stt-b": {"alt": "Magens Bay 354", "artist": "Pimlico27", "license": "CC BY-SA 3.0", "page": "https://commons.wikimedia.org/wiki/File:Magens_Bay_354.JPG"}, "eyw-a": {"alt": "Sunset Key, Key West", "artist": "RB Photo", "license": "CC BY 2.0", "page": "https://commons.wikimedia.org/wiki/File:Sunset_Key,_Key_West.jpg"}, "eyw-b": {"alt": "Misted Outdoor Restaurant on Duval Street, Key West, Florida", "artist": "Julian Lupyan", "license": "CC0", "page": "https://commons.wikimedia.org/wiki/File:Misted_Outdoor_Restaurant_on_Duval_Street,_Key_West,_Florida.jpg"}, "ecp-a": {"alt": "Panama City Beach, Florida (J.S. Clark)", "artist": "j.s. clark/ \"Image by jsclark.net.\"", "license": "CC BY-SA 2.0", "page": "https://commons.wikimedia.org/wiki/File:Panama_City_Beach,_Florida_(J.S._Clark).jpg"}, "ecp-b": {"alt": "Panama City beach pier - panoramio", "artist": "Evan Nichols (Virtua…", "license": "CC BY 3.0", "page": "https://commons.wikimedia.org/wiki/File:Panama_City_beach_pier_-_panoramio.jpg"}, "spi-a": {"alt": "South Padre Island beach panorama", "artist": "Spheroidite", "license": "CC BY-SA 4.0", "page": "https://commons.wikimedia.org/wiki/File:South_Padre_Island_beach_panorama.jpg"}, "spi-b": {"alt": "On the Beach at South Padre Island (51092030081)", "artist": "G. Lamar", "license": "CC BY 2.0", "page": "https://commons.wikimedia.org/wiki/File:On_the_Beach_at_South_Padre_Island_(51092030081).jpg"}};
+
+const D = [
+ {id:"ctg", name:"Cartagena", country:"Colombia", code:"CTG", area:"Getsemaní", friends:false,
+  flight:{est:600, avg:538, how:"1 stop · ~8h"}, extras:10,
+  visa:{lvl:"good", short:"Visa free"}, adv:3,
+  fun:{beach:6, clubs:8, bars:9, cafes:9, vibe:10},
+  stay:{night:250, fees:100, cleanIncl:true, cleanTip:60, cleanVisit:0, hotelPPN:55, aiPPN:null},
+  food:40, act:220,
+  vibe:"Old San Juan's older, cheaper, louder cousin. Painted colonial streets, salsa bars spilling onto plazas, rooftop cocktails on the city walls, and party boats to the islands by day.",
+  day:[["10am","Coffee at Época, arepas de huevo from a street stall"],["12pm","Party boat to Cholón or a day at Playa Blanca"],["6pm","Sunset drinks on the walls at Café del Mar"],["11pm","Street beers in Plaza Trinidad, then salsa at Café Havana"]],
+  beaches:["Playa Blanca, Barú","Rosario Islands day trip","Cholón party lagoon","Bocagrande (10 min taxi)"],
+  clubs:["Café Havana (live salsa)","Mister Babilla","La Movida","Alquímico top floor"],
+  bars:["Plaza de la Trinidad","Bazurto Social Club","Demente","Café del Mar (on the walls)"],
+  cafes:["Época Espresso Bar","Café San Alberto","Ábaco Libros y Café","La Cevichería"],
+  pros:["Best fun per dollar of any beach option","Big pool houses often include a housekeeper","Everything walkable from Getsemaní"],
+  cons:["Best beaches are a boat ride, not the front door","Colombia Level 3 overall","Hot and humid, so the pool matters"],
+  q:"Getsemaní, Cartagena, Colombia"},
+
+ {id:"pvr", name:"Puerto Vallarta", country:"Mexico", code:"PVR", area:"Zona Romántica", friends:false,
+  flight:{est:760, avg:707, how:"1 stop · ~8h"}, extras:10,
+  visa:{lvl:"good", short:"Visa free w/ US visa"}, adv:3,
+  fun:{beach:7, clubs:8, bars:8, cafes:8, vibe:8},
+  stay:{night:230, fees:150, cleanIncl:false, cleanTip:0, cleanVisit:40, hotelPPN:70, aiPPN:130},
+  food:50, act:220,
+  vibe:"Condado with tacos. Cobblestone streets, Los Muertos beach at the end of the block, boat days to jungle coves, and the Malecón clubs a waterfront walk away.",
+  day:[["10am","Café San Angel, then Los Muertos beach"],["1pm","Boat to Yelapa or Las Caletas"],["7pm","Al pastor at Pancho's Takos (the queue is worth it)"],["11pm","Malecón: La Vaquita, then Mandala"]],
+  beaches:["Los Muertos (walk out)","Conchas Chinas","Yelapa boat day","Colomitos cove"],
+  clubs:["La Vaquita","Mandala","Strana","Mantamar Beach Club (day party)"],
+  bars:["Andale","La Bodeguita del Medio (salsa)","Los Muertos pier beach bars"],
+  cafes:["Café San Angel","Page in the Sun","Pancho's Takos","Joe Jack's Fish Shack"],
+  pros:["Most walkable beach + nightlife combo","About $640 pp cheaper than Cabo","Great boat days"],
+  cons:["Jalisco is Level 3 (resort zone is patrolled)","Fun, not Cabo-wild","A bit over $1,600"],
+  q:"Zona Romantica, Puerto Vallarta"},
+
+ {id:"gig", name:"Rio de Janeiro", country:"Brazil", code:"GIG", area:"Ipanema", friends:true,
+  flight:{est:1050, avg:1259, how:"1 stop · ~14h"}, extras:110,
+  visa:{lvl:"bad", short:"Consular visa"}, adv:2,
+  fun:{beach:10, clubs:8, bars:10, cafes:8, vibe:10},
+  stay:{night:260, fees:100, cleanIncl:false, cleanTip:0, cleanVisit:30, hotelPPN:60, aiPPN:null},
+  food:45, act:260,
+  vibe:"The highest fun score on the board. Ipanema by day, the whole beach clapping for sunset at Arpoador, samba in the streets, and Lapa going until sunrise. Caipirinhas cost less than a Starbucks.",
+  day:[["10am","Açaí bowl, then Ipanema at Posto 9"],["5pm","Sunset applause on the Arpoador rock"],["8pm","Beers on the sea wall at Bar Urca"],["12am","Lapa arches, then Rio Scenarium"]],
+  beaches:["Ipanema, Posto 9","Arpoador (sunset)","Copacabana","Prainha (surf)"],
+  clubs:["Rio Scenarium","Circo Voador","Lapa street party (Fri)"],
+  bars:["Pedra do Sal samba (Mon)","Bar Urca","Jobi (Leblon boteco)","Beach kiosks"],
+  cafes:["Talho Capixaba","Confeitaria Colombo","Açaí on every corner","Churrascaria night"],
+  pros:["Best beach and best night out, both at once","Cheap once we land","Mid March is still summer"],
+  cons:["Every Indian passport needs a Brazil visa","14h flight each way","Phone theft on beaches is common"],
+  q:"Ipanema, Rio de Janeiro"},
+
+ {id:"puj", name:"Punta Cana", country:"Dominican Republic", code:"PUJ", area:"Los Corales, Bávaro", friends:false,
+  flight:{est:650, avg:588, how:"Nonstop · 4h"}, extras:25,
+  visa:{lvl:"good", short:"$10 tourist card"}, adv:2,
+  fun:{beach:10, clubs:7, bars:5, cafes:4, vibe:6},
+  stay:{night:220, fees:120, cleanIncl:false, cleanTip:0, cleanVisit:35, hotelPPN:85, aiPPN:110},
+  food:45, act:220,
+  vibe:"A perfect ten on beaches, with turquoise water straight out the door and a 4 hour nonstop to get there. The nights are taxi rides to big clubs, and there's no real town to wander.",
+  day:[["10am","Straight out the door onto Los Corales beach"],["1pm","Saona Island catamaran with rum punch"],["6pm","Sunset at Huracán Café"],["11pm","Taxi to Imagine, the club in a cave"]],
+  beaches:["Los Corales (walk out)","Juanillo, Cap Cana","Saona Island","Macao (surf)"],
+  clubs:["Imagine (cave club)","Coco Bongo (show + open bar)","Oro (Hard Rock)"],
+  bars:["Huracán Café","Onno's Bávaro","Kukua Beach Club"],
+  cafes:["Captain Cook (seafood on the sand)","Colmado breakfasts","Beach shack juice"],
+  pros:["Best water, shortest flight","All-inclusive option means no cleaning, drinks included","Low seaweed in March"],
+  cons:["Not walkable, taxis to every club","Resort bubble, weak café and bar scene","Coco Bongo runs $80 to $200"],
+  q:"Los Corales, Bávaro, Punta Cana"},
+
+ {id:"mde", name:"Medellín", country:"Colombia", code:"MDE", area:"El Poblado, Provenza", friends:false,
+  flight:{est:560, avg:586, how:"1 stop · ~9h"}, extras:12,
+  visa:{lvl:"good", short:"Visa free"}, adv:3,
+  fun:{beach:1, clubs:10, bars:9, cafes:10, vibe:9},
+  stay:{night:170, fees:80, cleanIncl:false, cleanTip:0, cleanVisit:25, hotelPPN:45, aiPPN:null},
+  food:35, act:200,
+  vibe:"Ten out of ten clubs and cafés, the cheapest trip here, and spring weather every day. The dealbreaker is the beach score of 1: there's no ocean, just a lake day in Guatapé.",
+  day:[["10am","Pergamino coffee in Provenza"],["12pm","Climb the Guatapé rock, boat on the lake"],["7pm","Rooftop drinks at Envy"],["11pm","Parque Lleras, then Salón Amador"]],
+  beaches:["None in the city","Guatapé lake day (2h)"],
+  clubs:["Salón Amador","Envy Rooftop","Parque Lleras clubs"],
+  bars:["Tres Cordilleras brewery","Bogotá Beer Company","Provenza rooftops"],
+  cafes:["Pergamino Café","Café Velvet","Hacienda (bandeja paisa)","Mondongo's"],
+  pros:["Cheapest trip on the list","Best nightlife per dollar in the Americas","Huge modern Airbnbs for cheap"],
+  cons:["No beach. At all.","Drink spiking near Lleras: never leave your drink","Colombia Level 3 overall"],
+  q:"Provenza, El Poblado, Medellin"},
+
+ {id:"mbj", name:"Negril", country:"Jamaica", code:"MBJ", area:"Seven Mile Beach", friends:false,
+  flight:{est:600, avg:615, how:"Nonstop · 4h"}, extras:50,
+  visa:{lvl:"good", short:"Visa free"}, adv:3,
+  fun:{beach:9, clubs:6, bars:8, cafes:6, vibe:9},
+  stay:{night:300, fees:100, cleanIncl:true, cleanTip:60, cleanVisit:0, hotelPPN:75, aiPPN:150},
+  food:55, act:240,
+  vibe:"Seven miles of sand with reggae bars on the beach, cliff jumping at sunset, and jerk chicken at 1am. The villas usually come with a housekeeper, sometimes a cook.",
+  day:[["10am","Seven Mile Beach, 1 minute from the villa"],["1pm","Catamaran to Booby Cay"],["5pm","Cliff jump and sunset at Rick's Café"],["11pm","Live reggae at Alfred's, jerk at 3 Dives"]],
+  beaches:["Seven Mile Beach (walk out)","Booby Cay","Rick's Café cliffs","Bloody Bay"],
+  clubs:["Jungle Negril","Alfred's Ocean Palace","Margaritaville MoBay"],
+  bars:["Rick's Café","Bourbon Beach","Ivan's Bar on the cliffs"],
+  cafes:["3 Dives Jerk Centre","Ivan's Bar","Jerk stands on the beach road"],
+  pros:["Nonstop, visa free, beach at the door","Housekeeper usually included","Top vibe score"],
+  cons:["Level 3: taxis at night, don't walk","90 min airport transfer","Fewer big clubs"],
+  q:"Seven Mile Beach, Negril, Jamaica"},
+
+ {id:"sjd", name:"Cabo San Lucas", country:"Mexico", code:"SJD", area:"Downtown by the Marina", friends:true,
+  flight:{est:850, avg:734, how:"1 stop · ~8h"}, extras:30,
+  visa:{lvl:"good", short:"Visa free w/ US visa"}, adv:2,
+  fun:{beach:7, clubs:10, bars:9, cafes:6, vibe:9},
+  stay:{night:450, fees:250, cleanIncl:false, cleanTip:0, cleanVisit:50, hotelPPN:110, aiPPN:170},
+  food:65, act:300,
+  vibe:"The spring break capital, with a ten for clubs. Médano Beach parties all day and Squid Roe goes all night. It's also the most expensive week of the year to go.",
+  day:[["10am","Chilaquiles and coffee at Doce Cuarenta"],["12pm","Médano Beach, Mango Deck contests"],["5pm","Booze cruise past the Arch"],["11pm","Squid Roe until close"]],
+  beaches:["Médano (party beach)","Lovers Beach by the Arch","Chileno Bay","Santa María Bay"],
+  clubs:["El Squid Roe","Mandala","Taboo Beach Club","Cabo Wabo Cantina"],
+  bars:["Mango Deck","The Office on the Beach","Cabo Wabo"],
+  cafes:["Doce Cuarenta","Tacos Gardenias","Maria Corona"],
+  pros:["Biggest party on the list","Walkable strip and beach","Riu Santa Fe pool parties if all-inclusive"],
+  cons:["Our week is its priciest week","Over PR's $2,000 in every setup","US-level prices"],
+  q:"Cabo San Lucas Marina, Baja California Sur"},
+
+ {id:"lir", name:"Tamarindo", country:"Costa Rica", code:"LIR", area:"Central Tamarindo", friends:false,
+  flight:{est:640, avg:555, how:"1 stop · ~7.5h"}, extras:50,
+  visa:{lvl:"warn", short:"Multi-entry US visa only"}, adv:2,
+  fun:{beach:8, clubs:6, bars:7, cafes:7, vibe:8},
+  stay:{night:300, fees:150, cleanIncl:false, cleanTip:0, cleanVisit:40, hotelPPN:80, aiPPN:null},
+  food:60, act:240,
+  vibe:"A surf town where the jungle hits the beach, with a proper bar strip and dry season sunsets. It's more chill than wild, and costs are closer to US prices.",
+  day:[["9am","Surf lesson on Tamarindo beach"],["1pm","Lunch at Nogui's"],["5pm","Sunset catamaran"],["10pm","Crazy Monkey or Sharky's"]],
+  beaches:["Tamarindo (walk out)","Playa Langosta","Playa Conchal","Flamingo"],
+  clubs:["Crazy Monkey (Mon night)","Sharky's (late)"],
+  bars:["Sharky's","Main strip beach bars","Pangas at sunset"],
+  cafes:["Nogui's","Green Papaya (tacos)","Pangas Beach Club"],
+  pros:["Beach + nightlife in one walkable town","Calmest advisory on the list","Dry season"],
+  cons:["Stricter visa rule for Indian passports","Near-US prices","Extra shuttle each way"],
+  q:"Tamarindo, Guanacaste, Costa Rica"},
+
+ {id:"pe", name:"Máncora", country:"Peru", code:"LIM", area:"Máncora beach town", friends:true,
+  flight:{est:740, avg:839, how:"1 stop + domestic · ~15h"}, extras:150,
+  visa:{lvl:"good", short:"Visa free"}, adv:2,
+  fun:{beach:7, clubs:6, bars:6, cafes:5, vibe:8},
+  stay:{night:180, fees:60, cleanIncl:false, cleanTip:0, cleanVisit:20, hotelPPN:40, aiPPN:null},
+  food:35, act:250,
+  vibe:"The Peru answer with a beach. A backpacker surf town where Loki throws a party every night, you swim with turtles, and ceviche is perfect. It takes a full day to get there each way.",
+  day:[["9am","Surf lesson on the point"],["12pm","Tuk tuk to El Ñuro, swim with turtles"],["6pm","Pisco sours on the sand"],["11pm","Loki del Mar party"]],
+  beaches:["Máncora main beach","Las Pocitas","El Ñuro (turtles)","Vichayito"],
+  clubs:["Loki del Mar parties","Av. Piura late bars"],
+  bars:["Beach bars on Av. Piura","Sunset at the point"],
+  cafes:["Green Eggs & Ham","La Sirena d'Juan","Ceviche carts"],
+  pros:["Cheap once there","Real party beach town","Add a Lima food night"],
+  cons:["Full travel day each way","Small town, few clubs","Machu Picchu is a separate trip"],
+  q:"Mancora, Piura, Peru"},
+
+ {id:"nas", name:"Nassau", country:"Bahamas", code:"NAS", area:"Cable Beach", friends:false,
+  flight:{est:680, avg:624, how:"1 stop · ~5.5h"}, extras:15,
+  visa:{lvl:"good", short:"Visa free w/ US visa"}, adv:2,
+  fun:{beach:9, clubs:5, bars:5, cafes:5, vibe:5},
+  stay:{night:500, fees:250, cleanIncl:false, cleanTip:0, cleanVisit:70, hotelPPN:130, aiPPN:190},
+  food:80, act:280,
+  vibe:"Postcard water and an easy flight, but you pay US prices for Caribbean nightlife that goes to bed early. It has the lowest fun per dollar on the board.",
+  day:[["10am","Cable Beach"],["12pm","Rose Island boat day"],["7pm","Conch and Kalik at Arawak Cay"],["11pm","Aura at Atlantis (pricey)"]],
+  beaches:["Cable Beach (walk out)","Cabbage Beach","Rose Island","Junkanoo Beach"],
+  clubs:["Aura (Atlantis)","Señor Frog's"],
+  bars:["Arawak Cay fish fry","Baha Mar lounges","Junkanoo Beach bars"],
+  cafes:["Twin Brothers (Arawak Cay)","Conch salad stands"],
+  pros:["Short flight, clear water","Easy entry"],
+  cons:["Most expensive place on the list","Thin nightlife","Way over budget"],
+  q:"Cable Beach, Nassau, Bahamas"},
+
+ {id:"mia", name:"Miami Beach", country:"USA, Florida", code:"MIA", area:"South Beach", friends:false, usa:true,
+  flight:{est:230, avg:199, how:"Nonstop · 3h"}, extras:40,
+  visa:{lvl:"good", short:"Domestic, no visa"}, adv:0,
+  fun:{beach:8, clubs:10, bars:9, cafes:9, vibe:8},
+  stay:{night:420, fees:250, cleanIncl:false, cleanTip:0, cleanVisit:60, hotelPPN:120, aiPPN:null},
+  food:75, act:250,
+  vibe:"The best nightlife on the whole board and the cheapest flight, but you have to be 21. Clubs card hard at the door, Miami Beach bans drinking on the sand, and police presence in March is heavy.",
+  day:[["11am","Cuban coffee at Versailles, then Lummus Park"],["2pm","South Beach, no alcohol on the sand"],["7pm","Stone crab or a Broken Shaker cocktail"],["12am","LIV, Story or E11EVEN, all 21+"]],
+  beaches:["South Beach","Lummus Park","Haulover","Key Biscayne"],
+  clubs:["LIV","Story","E11EVEN (24 hours)","Space"],
+  bars:["Broken Shaker","Bodega","Ocean Drive patios"],
+  cafes:["Versailles (Little Havana)","La Sandwicherie","Joe's Stone Crab"],
+  pros:["Cheapest flight on the board, 3h nonstop","World class clubs and food","No passport, no visa, no border on the way home"],
+  cons:["21+ or the whole trip breaks","Alcohol banned on the beach, heavy policing in March","South Beach rentals are expensive"],
+  q:"South Beach, Miami Beach, Florida"},
+
+ {id:"stt", name:"St Thomas", country:"US Virgin Islands", code:"STT", area:"Red Hook", friends:false, usa:true,
+  flight:{est:800, avg:720, how:"Nonstop · 4h"}, extras:40,
+  visa:{lvl:"good", short:"Domestic, no visa"}, adv:0,
+  fun:{beach:10, clubs:4, bars:7, cafes:6, vibe:7},
+  stay:{night:480, fees:300, cleanIncl:false, cleanTip:0, cleanVisit:70, hotelPPN:125, aiPPN:null},
+  food:85, act:280,
+  vibe:"The Puerto Rico trick again: a US territory, so it's a domestic flight with no passport and no border on the way back, and the drinking age is 18. Unreal beaches, but nightlife is bars not clubs, and it costs a lot.",
+  day:[["10am","Magens Bay, one of the best beaches anywhere"],["1pm","Ferry to St John for Trunk Bay"],["6pm","Sunset drinks at Iggies"],["10pm","Duffy's Love Shack in Red Hook"]],
+  beaches:["Magens Bay","Sapphire Beach","Coki Beach","Trunk Bay, St John (ferry)"],
+  clubs:["No real club scene","Beach bar parties instead"],
+  bars:["Duffy's Love Shack","Iggies Beach Bar","Red Hook marina bars"],
+  cafes:["Gladys' Café","Beach grills","Fish tacos in Red Hook"],
+  pros:["Drinking age 18 and zero immigration risk, like PR","Best beaches on the board","No passport needed at all"],
+  cons:["Expensive: US prices on an island","Bars, not clubs","Boat trips to the BVI need passports, so skip those"],
+  q:"Red Hook, St Thomas, US Virgin Islands"},
+
+ {id:"spi", name:"South Padre Island", country:"USA, Texas", code:"HRL", area:"Padre Blvd strip", friends:false, usa:true,
+  flight:{est:450, avg:423, how:"1 stop · ~7h + 45 min drive"}, extras:90,
+  visa:{lvl:"good", short:"Domestic, no visa"}, adv:0,
+  fun:{beach:8, clubs:8, bars:8, cafes:5, vibe:8},
+  stay:{night:280, fees:200, cleanIncl:false, cleanTip:0, cleanVisit:45, hotelPPN:65, aiPPN:null},
+  food:60, act:200,
+  vibe:"The last real American spring break town: beach parties, concert stages and bars packed with students all March. Texas is 21+ though, and you need a rental car from Harlingen.",
+  day:[["11am","Beach party on the sand"],["3pm","Clayton's, the biggest beach bar in Texas"],["7pm","Shrimp baskets on the bay side"],["11pm","Louie's Backyard"]],
+  beaches:["South Padre beach","Isla Blanca Park","Boca Chica"],
+  clubs:["Clayton's Beach Bar","Louie's Backyard","Wanna Wanna Beach Bar"],
+  bars:["Padre Blvd bars","Beachfront patios"],
+  cafes:["Yummies Bistro","Ted's Restaurant","Taco stands"],
+  pros:["Cheapest true spring break scene in the US","Everyone there is a college student","Rentals are cheap"],
+  cons:["21+ in Texas","Two connections and a rental car","Border area, so stay on the island"],
+  q:"South Padre Island, Texas"},
+
+ {id:"ecp", name:"Panama City Beach", country:"USA, Florida", code:"ECP", area:"Beachfront condos", friends:false, usa:true,
+  flight:{est:400, avg:449, how:"1 stop · ~5h"}, extras:70,
+  visa:{lvl:"good", short:"Domestic, no visa"}, adv:0,
+  fun:{beach:9, clubs:6, bars:7, cafes:5, vibe:5},
+  stay:{night:300, fees:200, cleanIncl:false, cleanTip:0, cleanVisit:45, hotelPPN:60, aiPPN:null},
+  food:60, act:200,
+  vibe:"White sand and cheap condos, but PCB spent a decade killing its own spring break. Alcohol is banned on the beach in March, the beach closes 10pm to 4am, and rentals only take 21+ bookings.",
+  day:[["11am","White sand and emerald water"],["2pm","Pool deck party at the condo"],["6pm","Pineapple Willy's on the pier"],["10pm","Spinnaker or Schooners, beach closed after 10"]],
+  beaches:["PCB main beach","St Andrews State Park","Shell Island"],
+  clubs:["Spinnaker Beach Club","Harpoon Harry's"],
+  bars:["Schooners","Pineapple Willy's"],
+  cafes:["Thomas Donut & Snack Shop","Seafood shacks"],
+  pros:["Cheapest US trip with a real beach","Big cheap condos right on the sand","Short drive from the airport"],
+  cons:["Alcohol banned on the beach in March, beach shut 10pm to 4am","Rentals require a 21+ booker","The party scene is mostly gone"],
+  q:"Panama City Beach, Florida"},
+
+ {id:"eyw", name:"Key West", country:"USA, Florida", code:"EYW", area:"Old Town, off Duval", friends:false, usa:true,
+  flight:{est:480, avg:574, how:"Nonstop · 3h20"}, extras:30,
+  visa:{lvl:"good", short:"Domestic, no visa"}, adv:0,
+  fun:{beach:5, clubs:6, bars:10, cafes:8, vibe:9},
+  stay:{night:450, fees:250, cleanIncl:false, cleanTip:0, cleanVisit:60, hotelPPN:130, aiPPN:null},
+  food:80, act:220,
+  vibe:"A bar crawl town. Duval Street is a mile of live music and open doors, and the whole island is walkable. The beaches are the weak part, and it's the safest place on the board.",
+  day:[["11am","Breakfast at Blue Heaven"],["1pm","Fort Zachary Taylor beach or a snorkel trip"],["6pm","Sunset circus at Mallory Square"],["9pm","Duval Street crawl: Sloppy Joe's, Green Parrot"]],
+  beaches:["Fort Zachary Taylor","Smathers Beach","Dry Tortugas day trip"],
+  clubs:["Rick's Duval","Irish Kevin's (live music)"],
+  bars:["Sloppy Joe's","Green Parrot","Hog's Breath","Schooner Wharf"],
+  cafes:["Blue Heaven","Cuban Coffee Queen","Key lime pie everywhere"],
+  pros:["Best bar street in the US, all walkable","Very safe, no car needed","Nonstop from PHL"],
+  cons:["21+","Weak beaches for a beach trip","Expensive rooms and food"],
+  q:"Old Town, Key West, Florida"}
+];
+
+const DIMS = [["beach","Beaches"],["clubs","Clubs"],["bars","Bars & pubs"],["cafes","Cafés & food"],["vibe","Vibe"]];
+/* safety: score out of 10, US advisory level (0 = no advisory, it's the US), and the honest note */
+const SAFETY = {
+ eyw:{s:9, lvl:"good", label:"US, no advisory", note:"Safest place on the board. A walkable tourist island where the main risk is your own bar tab."},
+ sjd:{s:8, lvl:"good", label:"Level 2", note:"Baja California Sur is Level 2, the calmest rating in Mexico. The tourist corridor is heavily policed."},
+ lir:{s:8, lvl:"good", label:"Level 2", note:"Costa Rica is Level 2 and Guanacaste is its quietest corner. Petty theft on the beach is the main thing."},
+ ecp:{s:8, lvl:"good", label:"US, no advisory", note:"Heavy police presence in March by design: beach closed 10pm to 4am, alcohol banned on the sand."},
+ spi:{s:8, lvl:"good", label:"US, no advisory", note:"Safe on the island itself. Do not drive across to Matamoros, that border area is Level 4."},
+ puj:{s:7, lvl:"good", label:"Level 2", note:"DR is Level 2. Resort zones are fine; the usual rules about taxis and drinks apply."},
+ nas:{s:7, lvl:"good", label:"Level 2", note:"Bahamas is Level 2 with a violent crime warning for parts of Nassau. Tourist areas and Cable Beach are fine."},
+ mia:{s:7, lvl:"good", label:"US, no advisory", note:"Very heavy policing in March. The real risk is an arrest for drinking on the beach, not crime."},
+ stt:{s:7, lvl:"good", label:"US, no advisory", note:"US territory, no advisory. Avoid the housing estates around Charlotte Amalie at night."},
+ gig:{s:6, lvl:"warn", label:"Level 2", note:"Brazil is Level 2, but phone snatching on Ipanema and Copacabana is constant. Bring an old phone and no jewellery."},
+ pe:{s:6, lvl:"warn", label:"Level 2", note:"Peru is Level 2. Máncora is a small tourist town; the usual bus and taxi caution applies."},
+ pvr:{s:6, lvl:"warn", label:"Level 3 state", note:"Jalisco is Level 3 because of cartel activity elsewhere in the state. Puerto Vallarta's resort zone is not where that happens, but the rating is real."},
+ ctg:{s:5, lvl:"warn", label:"Level 3", note:"Colombia is Level 3 overall: reconsider travel. Cartagena's walled city and Getsemaní are busy and policed, but drink spiking and robbery target tourists at night."},
+ mbj:{s:5, lvl:"warn", label:"Level 3", note:"Jamaica is Level 3 for violent crime. Resort strips are patrolled; take taxis at night and stay on the beach road."},
+ mde:{s:4, lvl:"bad", label:"Level 3 + drugging", note:"Colombia is Level 3, and Medellín has a scopolamine problem: 304 drugging reports in the first five months of 2026, against 443 in all of the year before. Almost all involve someone met that night."}
+};
+const AGE = {mia:21, eyw:21, ecp:21, spi:21};
+const drinkAge = d => AGE[d.id] || 18;
+const safety = d => SAFETY[d.id];
+const SEGS = [["getting","Getting there","--s1"],["stay","Stay","--s2"],["clean","Cleaning","--s3"],["food","Food & drinks","--s4"],["act","Nights out & activities","--s5"]];
+const PICK_IDS = ["puj","ctg","sjd"];
+const state = {n:6, mode:"airbnb", sort:{key:"fun", dir:-1}, filter:"all"};
+
+function cost(d, n, mode){
+  const getting = d.flight.est + GROUND + d.extras;
+  let m = mode, stay, clean, food = d.food*DAYS;
+  if(m==="ai" && !d.stay.aiPPN) m = "airbnb";
+  if(m==="airbnb"){ stay = (d.stay.night*NIGHTS + d.stay.fees)/n; clean = d.stay.cleanIncl ? d.stay.cleanTip/n : d.stay.cleanVisit*3/n; }
+  else if(m==="hotel"){ stay = d.stay.hotelPPN*NIGHTS; clean = 0; food += 60; }
+  else { stay = d.stay.aiPPN*NIGHTS; clean = 0; food = food*0.3; }
+  const parts = {getting, stay:Math.round(stay), clean:Math.round(clean), food:Math.round(food), act:d.act};
+  return {parts, total:Object.values(parts).reduce((a,b)=>a+b,0), modeUsed:m};
+}
+const funTotal = d => DIMS.reduce((a,[k])=>a+d.fun[k],0);
+const value = (d,total) => funTotal(d)/(total/1000);
+const $ = s => document.querySelector(s);
+const money = v => "$" + Math.round(v).toLocaleString("en-US");
+const status = t => t<=BUDGET ? ["good","On budget"] : t<=PR ? ["warn","Stretch"] : ["bad","Over PR"];
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+const modeLabel = {airbnb:"Airbnb + cleaner", hotel:"Hotel", ai:"All-inclusive"};
+const airbnbURL = (d,n) => "https://www.airbnb.com/s/"+encodeURIComponent(d.q)+"/homes?checkin="+CHECKIN+"&checkout="+CHECKOUT+"&adults="+n+"&min_bedrooms=3";
+const mapsURL = d => "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(d.q);
+const img = (id, cls="", eager=false) => { const c = CREDITS[id]; return `<img src="photos/${id}.jpg" alt="${esc(c ? c.alt : "")}" ${eager?"":'loading="lazy"'} class="${cls}" onerror="this.style.visibility='hidden'">`; };
+const rows = () => D.map(d=>{ const c = cost(d,state.n,state.mode); return {d, c, fun:funTotal(d), val:value(d,c.total)}; });
+const flap = code => '<span class="flap" aria-label="'+code+'">'+[...code].map(ch=>"<i>"+ch+"</i>").join("")+"</span>";
+
+function renderStrip(){
+  const ids = ["puj","ctg","mia","sjd","stt"];
+  $("#strip").innerHTML = ids.map((id,i)=>{
+    const d = D.find(x=>x.id===id), c = cost(d,state.n,state.mode);
+    return `<figure class="postcard" style="margin:0">${img(id+"-a","",i<5)}<figcaption><span class="pc-name">${esc(d.name)}</span><span class="pc-line">${money(c.total)} pp · fun ${funTotal(d)}/50</span></figcaption></figure>`;
+  }).join("");
+}
+
+function renderBoard(){
+  const r = rows().sort((a,b)=>b.val-a.val);
+  $("#board").innerHTML = r.map(({d,c,fun,val})=>{
+    const [cls,lbl] = status(c.total);
+    const fb = state.mode==="ai" && c.modeUsed!=="ai" ? ' <small style="color:var(--flap-dim)">(Airbnb)</small>' : "";
+    const sf = safety(d), age = drinkAge(d);
+    return `<tr><td>${flap(d.code)}</td><td><div class="city">${img(d.id+"-a","",true)}<div>${esc(d.name)}<small>${esc(d.country)} · ${esc(d.flight.how)}</small></div></div></td><td class="fun">${fun}<small>/50</small><span class="funbar"><b style="width:${fun*2}%"></b></span></td><td class="cost">${money(c.total)}${fb}</td><td class="fun">${val.toFixed(1)} <small>pts</small></td><td><span class="chip ${sf.lvl}">${esc(sf.label)}</span></td><td><span class="chip ${age===18?"good":"bad"}">${age}+</span></td><td><span class="chip ${cls}">${lbl}</span></td></tr>`;
+  }).join("");
+  const under = r.filter(x=>x.c.total<=BUDGET).length;
+  $("#board-foot").textContent = `${state.n} people · ${modeLabel[state.mode]} · ${under} of ${D.length} under $1,600 · fun per $1k = fun score ÷ cost in thousands · estimates, Sep 2026`;
+}
+
+/* scatter */
+const SX = {l:64, r:24, t:28, b:56, W:760, H:460, x0:1200, x1:3100, y0:25, y1:50};
+const LBL = {mde:[0,-15,"middle"], ctg:[0,-16,"middle"], puj:[-13,15,"end"], pe:[13,15,"start"], ecp:[0,-15,"middle"], spi:[-13,-7,"end"], pvr:[-13,-7,"end"], mbj:[13,13,"start"], lir:[0,17,"middle"], eyw:[13,4,"start"], gig:[0,-16,"middle"], sjd:[0,-16,"middle"], mia:[0,-16,"middle"], stt:[-13,4,"end"], nas:[-13,4,"end"]};
+const SCOL = {good:"--good", warn:"--warn", bad:"--bad"};
+function renderScatter(){
+  const {l,r,t,b,W,H,x0,x1,y0,y1} = SX;
+  const X = v => l + (v-x0)/(x1-x0)*(W-l-r);
+  const Y = e => t + (y1-e)/(y1-y0)*(H-t-b);
+  let s = "";
+  s += `<rect x="${X(x0)}" y="${Y(y1)}" width="${X(BUDGET)-X(x0)}" height="${Y(37.5)-Y(y1)}" style="fill:var(--accent-soft)"></rect>`;
+  for(let v=1200; v<=2800; v+=400){ s += `<line x1="${X(v)}" x2="${X(v)}" y1="${Y(y1)}" y2="${Y(y0)}" style="stroke:var(--rule)" stroke-width="1"></line><text x="${X(v)}" y="${H-b+20}" text-anchor="middle" font-size="11" style="fill:var(--muted)">$${(v/1000).toFixed(1)}k</text>`; }
+  for(let e=25; e<=50; e+=5){ s += `<line x1="${X(x0)}" x2="${X(x1)}" y1="${Y(e)}" y2="${Y(e)}" style="stroke:var(--rule)" stroke-width="1"></line><text x="${l-10}" y="${Y(e)+4}" text-anchor="end" font-size="11" style="fill:var(--muted)">${e}</text>`; }
+  s += `<text x="${(l+W-r)/2}" y="${H-10}" text-anchor="middle" font-size="11" style="fill:var(--ink-2)">cost per person, all in →</text>`;
+  s += `<text transform="translate(16 ${(t+H-b)/2}) rotate(-90)" text-anchor="middle" font-size="11" style="fill:var(--ink-2)">fun score out of 50 →</text>`;
+  s += `<line x1="${X(BUDGET)}" x2="${X(BUDGET)}" y1="${Y(y1)}" y2="${Y(y0)}" style="stroke:var(--ink)" stroke-width="1.5"></line>`;
+  s += `<line x1="${X(PR)}" x2="${X(PR)}" y1="${Y(y1)}" y2="${Y(y0)}" style="stroke:var(--bad)" stroke-width="1.5" stroke-dasharray="5 4"></line>`;
+  s += `<text x="${X(x0)+10}" y="${Y(y1)+18}" font-size="12" font-weight="600" style="fill:var(--accent)">SWEET SPOT</text>`;
+  s += `<text x="${X(x1)-10}" y="${Y(y1)+18}" text-anchor="end" font-size="11" style="fill:var(--muted)">great, but pricey</text>`;
+  s += `<text x="${X(x0)+10}" y="${Y(y0)-10}" font-size="11" style="fill:var(--muted)">cheap, but quieter</text>`;
+  s += `<text x="${X(x1)-10}" y="${Y(y0)-10}" text-anchor="end" font-size="11" style="fill:var(--muted)">skip</text>`;
+  const rs = rows();
+  rs.forEach(({d,c,fun,val})=>{
+    const pick = PICK_IDS.includes(d.id), cx = X(Math.min(c.total,x1)), cy = Y(fun), [dx,dy,anc] = LBL[d.id], sf = safety(d);
+    s += `<circle cx="${cx}" cy="${cy}" r="${pick?10:7}" style="fill:var(${SCOL[sf.lvl]});stroke:var(${pick?"--ink":"--paper"})" stroke-width="${pick?3:2}" data-tip="${esc(d.name)} · ${money(c.total)} · fun ${fun}/50 · ${val.toFixed(1)} pts per $1k · ${esc(sf.label)} · ${drinkAge(d)}+"></circle>`;
+    s += `<text x="${cx+dx}" y="${cy+dy}" text-anchor="${anc}" font-size="12" font-weight="600" paint-order="stroke" stroke-width="4" style="fill:var(--ink);stroke:var(--paper);font-family:var(--body)">${esc(d.name)}</text>`;
+  });
+  $("#scatter").innerHTML = s;
+  const byVal = [...rs].sort((a,b)=>b.val-a.val), beachy = byVal.filter(x=>x.d.fun.beach>=6);
+  const clean = byVal.filter(x=>safety(x.d).s>=7 && drinkAge(x.d)===18 && x.d.fun.beach>=6);
+  const top = [...rs].sort((a,b)=>b.fun-a.fun)[0];
+  $("#readout").innerHTML =
+    `<div><span class="eyebrow">Most fun per dollar</span><b>${esc(byVal[0].d.name)}</b><span>${byVal[0].val.toFixed(1)} pts per $1k${byVal[0].d.fun.beach<6?", but no beach":""}${safety(byVal[0].d).s<6?", and the worst safety score":""}</span></div>`+
+    `<div><span class="eyebrow">Best value with a beach</span><b>${esc(beachy[0].d.name)}</b><span>${beachy[0].val.toFixed(1)} pts per $1k at ${money(beachy[0].c.total)}</span></div>`+
+    `<div><span class="eyebrow">Best value that also clears safety and 18+</span><b>${esc(clean[0].d.name)}</b><span>${clean[0].val.toFixed(1)} pts per $1k, ${esc(safety(clean[0].d).label)}</span></div>`+
+    `<div><span class="eyebrow">Most fun, full stop</span><b>${esc(top.d.name)}</b><span>${top.fun}/50 at ${money(top.c.total)}</span></div>`;
+}
+
+function renderHeat(){
+  const rs = rows();
+  const {key,dir} = state.sort;
+  const get = (x,k) => k==="name" ? x.d.name : k==="fun" ? x.fun : k==="total" ? x.c.total : k==="val" ? x.val : k==="safe" ? safety(x.d).s : k==="age" ? drinkAge(x.d) : x.d.fun[k];
+  rs.sort((a,b)=> key==="name" ? a.d.name.localeCompare(b.d.name)*dir : (get(a,key)-get(b,key))*dir);
+  const cols = [["name","Destination"],...DIMS,["fun","Fun /50"],["safe","Safety /10"],["age","Drink at"],["total","Cost pp"],["val","Pts per $1k"]];
+  const head = "<thead><tr>"+cols.map(([k,lab])=>{
+    const s = key===k ? ` aria-sort="${dir===1?"ascending":"descending"}"` : "";
+    return `<th${s}><button type="button" id="sort-${k}" data-k="${k}">${lab} <span aria-hidden="true">${key===k?(dir===1?"▲":"▼"):""}</span></button></th>`;
+  }).join("")+"</tr></thead>";
+  const body = "<tbody>"+rs.map(x=>{
+    const cells = DIMS.map(([k])=>{ const v=x.d.fun[k]; return `<td style="background:color-mix(in srgb, var(--heat) ${Math.round(v*5.5)}%, transparent)">${v}</td>`; }).join("");
+    const sf = safety(x.d), age = drinkAge(x.d);
+    return `<tr><td class="dn">${img(x.d.id+"-a")}<div>${esc(x.d.name)}<small>${esc(x.d.country)}</small></div></td>${cells}<td class="tot">${x.fun}</td><td style="background:color-mix(in srgb, var(--${sf.lvl==="good"?"good":sf.lvl==="warn"?"warn":"bad"}) ${sf.s>=7?30:22}%, transparent)" title="${esc(sf.label)}">${sf.s}</td><td class="tot" style="color:var(${age===18?"--good":"--bad"})">${age}+</td><td class="tot">${money(x.c.total)}</td><td class="tot">${x.val.toFixed(1)}</td></tr>`;
+  }).join("")+"</tbody>";
+  $("#heat").innerHTML = head+body;
+  $("#heat").querySelectorAll("th button").forEach(bt=>bt.addEventListener("click",()=>{
+    const k = bt.dataset.k;
+    if(state.sort.key===k) state.sort.dir*=-1; else state.sort = {key:k, dir:(k==="name"||k==="total")?1:-1};
+    renderHeat(); document.getElementById("sort-"+k).focus();
+  }));
+}
+
+function renderDossiers(){
+  const f = state.filter;
+  let list = rows().filter(({d,c})=> f==="all" || f==="value" || (f==="budget"&&c.total<=BUDGET) || (f==="beach"&&d.fun.beach>=8) || (f==="party"&&d.fun.clubs>=8) || (f==="friends"&&d.friends) || (f==="safe"&&safety(d).s>=7) || (f==="age18"&&drinkAge(d)===18) || (f==="usa"&&d.usa));
+  list.sort((a,b)=>b.val-a.val);
+  if(f==="value") list = list.slice(0,4);
+  if(!list.length){ $("#dossiers").innerHTML = '<p class="note">Nothing matches at this group size and stay type. Try 8 people.</p>'; return; }
+  $("#dossiers").innerHTML = list.map(({d,c,fun,val})=>{
+    const [cls,lbl] = status(c.total);
+    const a = cost(d,state.n,"airbnb"), h = cost(d,state.n,"hotel"), ai = d.stay.aiPPN ? cost(d,state.n,"ai") : null;
+    const cleanTxt = d.stay.cleanIncl ? `housekeeper usually included` : `3 cleaner visits at ~$${d.stay.cleanVisit}`;
+    const li = arr => arr.map(x=>`<li>${esc(x)}</li>`).join("");
+    return `<article class="dos">
+      <div class="dos-photo">${img(d.id+"-a")}<div class="inset">${img(d.id+"-b")}</div>
+        <div class="over"><span class="sub">PHL → ${d.code} · ${esc(d.flight.how)}</span><h3>${esc(d.name)}</h3><span class="sub">${esc(d.country)} · stay in ${esc(d.area)}</span></div>
+      </div>
+      <div class="dos-body">
+        <div class="dos-meta"><span class="chip ${cls}">${money(c.total)} · ${lbl}</span><span class="chip good">Fun ${fun}/50</span><span class="chip ${val>=22?"good":val>=18?"warn":"bad"}">${val.toFixed(1)} pts per $1k</span><span class="chip ${safety(d).lvl}">${esc(safety(d).label)}</span><span class="chip ${drinkAge(d)===18?"good":"bad"}">Drink at ${drinkAge(d)}</span>${d.friends?'<span class="chip warn">Friends asked</span>':""}</div>
+        <p class="vibe">${esc(d.vibe)}</p>
+        <p class="note"><strong>Safety:</strong> ${esc(safety(d).note)}</p>
+        <div class="funrow">${DIMS.map(([k,lab])=>`<div style="background:color-mix(in srgb, var(--heat) ${Math.round(d.fun[k]*5.5)}%, var(--sunk))"><b>${d.fun[k]}</b><span>${lab}</span></div>`).join("")}</div>
+        <div><div class="mini"><h4>A day here</h4></div><div class="day">${d.day.map(([t,x])=>`<div><span>${t}</span>${esc(x)}</div>`).join("")}</div></div>
+        <div class="four">
+          <div class="mini"><h4>Beaches</h4><ul>${li(d.beaches)}</ul></div>
+          <div class="mini"><h4>Clubs</h4><ul>${li(d.clubs)}</ul></div>
+          <div class="mini"><h4>Bars & pubs</h4><ul>${li(d.bars)}</ul></div>
+          <div class="mini"><h4>Cafés & food</h4><ul>${li(d.cafes)}</ul></div>
+        </div>
+        <div class="stays">
+          <div><span>Airbnb for ${state.n} + cleaning<small>~$${d.stay.night}/night whole place, ${cleanTxt}</small></span><span class="num">${money(a.total)} pp</span></div>
+          <div><span>Hotel, sharing doubles<small>~$${d.stay.hotelPPN} pp/night</small></span><span class="num">${money(h.total)} pp</span></div>
+          ${ai?`<div><span>All-inclusive<small>~$${d.stay.aiPPN} pp/night, food + drinks in</small></span><span class="num">${money(ai.total)} pp</span></div>`:""}
+        </div>
+        <div class="proscons">
+          <div><h4 class="tag-good">For</h4><ul>${li(d.pros)}</ul></div>
+          <div><h4 class="tag-bad">Against</h4><ul>${li(d.cons)}</ul></div>
+        </div>
+        <div class="links"><a href="${airbnbURL(d,state.n)}" target="_blank" rel="noopener">Airbnbs for our dates ↗</a><a href="${mapsURL(d)}" target="_blank" rel="noopener">Area in Maps ↗</a></div>
+      </div>
+    </article>`;
+  }).join("");
+}
+
+function renderLegend(){ $("#legend").innerHTML = SEGS.map(([k,l,v])=>`<span><i style="background:var(${v})"></i>${l}</span>`).join(""); }
+const MAXV = 3200;
+function renderBars(){
+  const rs = rows().sort((a,b)=>a.c.total-b.c.total), bars = $("#bars");
+  bars.innerHTML = rs.map(({d,c})=>{
+    const segs = SEGS.map(([k,l,v])=>`<b style="flex:0 0 calc(${(c.parts[k]/MAXV*100).toFixed(3)}% - 2px);background:var(${v})" data-tip="${esc(d.name)} · ${l}: ${money(c.parts[k])}"></b>`).join("");
+    return `<div class="bar-row"><div class="nm">${esc(d.name)}<small>${state.mode==="ai"&&c.modeUsed!=="ai"?"no AI, Airbnb used":esc(d.country)}</small></div><div class="track"><div class="stack">${segs}</div></div><div class="total">${money(c.total)}</div></div>`;
+  }).join("");
+  const tr = bars.querySelector(".track");
+  const g = document.createElement("div"); g.className = "gridlines"; g.style.left = tr.offsetLeft+"px"; g.style.width = tr.offsetWidth+"px";
+  const ticks = [0,400,800,1200,1600,2000,2400,2800,3200];
+  g.innerHTML = ticks.filter(t=>t&&t!==1600&&t!==2000).map(t=>`<span style="left:${t/MAXV*100}%"></span>`).join("")
+    + `<span class="line-budget" style="left:${BUDGET/MAXV*100}%"><em style="color:var(--ink)">$1,600 target</em></span><span class="line-pr" style="left:${PR/MAXV*100}%"><em style="color:var(--bad)">PR $2,000</em></span>`;
+  bars.appendChild(g);
+  $("#ticks").innerHTML = ticks.map(t=>`<span style="left:${t/MAXV*100}%">${t?"$"+t.toLocaleString("en-US"):"$0"}</span>`).join("");
+  $("#breakdown").innerHTML = `<thead><tr><th>Destination</th>${SEGS.map(s=>`<th>${s[1]}</th>`).join("")}<th>Total pp</th><th>Stay used</th></tr></thead><tbody>`
+    + rs.map(({d,c})=>`<tr><td>${esc(d.name)}</td>${SEGS.map(s=>`<td>${money(c.parts[s[0]])}</td>`).join("")}<td><strong>${money(c.total)}</strong></td><td>${modeLabel[c.modeUsed]}</td></tr>`).join("") + "</tbody>";
+}
+
+const WHY = {
+  puj:{rank:"1 · Safest fun for the money", why:["Level 2, drinking age 18, and a 4 hour nonstop from PHL","Best beach score on the board, and the all-inclusive kills both the cleaning and the bar tab","Weakest bars and cafés of the top 3, so the nights are taxi rides to big clubs"]},
+  ctg:{rank:"2 · Best value, with a caveat", why:["Most fun per dollar of anywhere with a beach: 42 out of 50 at about $1,590","But Colombia is Level 3, and drink spiking targets tourists at night","Doable if we stick together in Getsemaní and the walled city, take taxis, and never accept a drink we didn't watch poured"]},
+  sjd:{rank:"3 · Biggest party, safest state", why:["Clubs score 10 out of 10, and Baja California Sur is Level 2, the calmest rating in Mexico","Drinking age 18, and the strip is walkable, so no night taxis","The catch is money: our week is the most expensive week of its year"]}
+};
+function renderPicks(){
+  $("#picks").innerHTML = PICK_IDS.map((id,i)=>{
+    const d = D.find(x=>x.id===id), c = cost(d,state.n,state.mode), w = WHY[id];
+    return `<div class="pick${i===0?" first":""}"><div class="pimg">${img(id+"-b")}<span class="rank">${w.rank}</span></div><div class="pbody"><h3>${esc(d.name)}</h3><div class="stats"><span>${money(c.total)} <small>pp</small></span><span>${funTotal(d)}/50 <small>fun</small></span><span>${value(d,c.total).toFixed(1)} <small>pts/$1k</small></span></div><ul>${w.why.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>`;
+  }).join("");
+  const alsos = [
+    ["mia","If we were all 21","Best nightlife and the cheapest flight on the board, and no passport at all. Every club is 21+, so it only works if the whole group is."],
+    ["stt","The Puerto Rico move again","US territory, so it's a domestic flight with no passport and no border coming home, and the drinking age is 18. Beaches are unreal, but it's expensive and there are no clubs."],
+    ["mde","Cheapest, but read the safety note","Best clubs and cafés per dollar of anywhere here. It also has the worst safety score: Level 3 plus a drugging surge, and no beach."],
+    ["lir","The quiet safe one","Costa Rica is Level 2, Tamarindo is walkable, and the beaches are great. Fewer clubs, and Indian passports need a multi-entry US visa."]];
+  $("#alsos").innerHTML = alsos.map(([id,t,p])=>{ const d=D.find(x=>x.id===id), c=cost(d,state.n,state.mode); return `<div class="also">${img(id+"-a")}<div><span class="eyebrow">${t} · ${money(c.total)}</span><br><b>${esc(d.name)}</b><p>${p}</p></div></div>`; }).join("");
+  const modes = ["airbnb","hotel","ai"];
+  $("#showdown").innerHTML = `<thead><tr><th>Destination</th>${modes.map(m=>`<th>${modeLabel[m]}</th>`).join("")}<th>Cheapest way</th></tr></thead><tbody>`
+   + PICK_IDS.map(id=>{
+      const d = D.find(x=>x.id===id), vals = modes.map(m=> m==="ai"&&!d.stay.aiPPN ? null : cost(d,state.n,m).total);
+      const best = Math.min(...vals.filter(v=>v!==null));
+      return `<tr><td>${esc(d.name)}</td>${vals.map(v=>`<td>${v===null?"n/a":(v===best?`<strong>${money(v)}</strong>`:money(v))}</td>`).join("")}<td>${modeLabel[modes[vals.indexOf(best)]]}</td></tr>`;
+   }).join("") + "</tbody>";
+}
+
+function renderVisa(){
+  const o = {good:0,warn:1,bad:2};
+  $("#visa-mini").innerHTML = `<div class="mini"><h4>Visa for Indian passports</h4></div>` + [...D].sort((a,b)=>o[a.visa.lvl]-o[b.visa.lvl]).map(d=>`<div><b>${esc(d.name)}</b><span><span class="chip ${d.visa.lvl}">${esc(d.visa.short)}</span></span></div>`).join("");
+}
+function renderSafety(){
+  const order = [...D].sort((a,b)=>safety(b).s-safety(a).s);
+  $("#safety-list").innerHTML = order.map(d=>{
+    const sf = safety(d);
+    return `<div class="safety-row"><div><b>${esc(d.name)}</b><div class="note">${esc(d.country)}</div></div><div><span class="chip ${sf.lvl}">${esc(sf.label)}</span><div class="note" style="margin-top:4px">Safety ${sf.s}/10 · drink at ${drinkAge(d)}</div></div><p>${esc(sf.note)}</p></div>`;
+  }).join("");
+}
+function renderCredits(){
+  const ks = Object.keys(CREDITS);
+  $("#credits").innerHTML = ks.length ? ks.map(k=>{ const c=CREDITS[k]; return `<li><a href="${esc(c.page)}">${esc(c.alt)}</a> by ${esc(c.artist||"unknown")}, ${esc(c.license)}</li>`; }).join("") : "<li>Photo credits pending</li>";
+}
+
+function syncControls(){
+  document.querySelectorAll('[data-ctl="n"] button').forEach(b=>b.setAttribute("aria-pressed", String(+b.dataset.v===state.n)));
+  document.querySelectorAll('[data-ctl="mode"] button').forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.v===state.mode)));
+  document.querySelectorAll('.filter button').forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.f===state.filter)));
+}
+function renderAll(){ syncControls(); renderStrip(); renderBoard(); renderScatter(); renderHeat(); renderDossiers(); renderBars(); renderPicks(); }
+
+document.querySelectorAll('[data-ctl="n"] button').forEach(b=>b.addEventListener("click",()=>{state.n=+b.dataset.v; renderAll();}));
+document.querySelectorAll('[data-ctl="mode"] button').forEach(b=>b.addEventListener("click",()=>{state.mode=b.dataset.v; renderAll();}));
+document.querySelectorAll('.filter button').forEach(b=>b.addEventListener("click",()=>{state.filter=b.dataset.f; syncControls(); renderDossiers();}));
+
+const tip = $("#tip");
+document.addEventListener("pointermove", e=>{
+  const t = e.target.closest && e.target.closest("[data-tip]");
+  if(!t){ tip.hidden = true; return; }
+  tip.textContent = t.dataset.tip; tip.hidden = false;
+  tip.style.left = Math.min(e.clientX+12, window.innerWidth-tip.offsetWidth-8)+"px"; tip.style.top = (e.clientY-38)+"px";
+});
+window.addEventListener("resize", ()=>renderBars());
+
+renderLegend(); renderVisa(); renderSafety(); renderCredits(); renderAll();
+</script>

@@ -1,0 +1,158 @@
+#!/usr/bin/env python3
+"""Canvas LMS CLI for F&M. Reads creds from ~/.canvas_env
+Usage:
+  canvas courses
+  canvas upcoming [days]        # default 14
+  canvas todo
+  canvas assignments <code|id>
+  canvas grades
+  canvas announcements [days]
+  canvas modules <code|id>
+  canvas files <code|id>
+  canvas raw <api-path>         # e.g. raw /api/v1/users/self/profile
+"""
+import json, os, sys, urllib.request, urllib.parse, datetime, re
+
+ENV = os.path.expanduser("~/.canvas_env")
+cfg = {}
+for line in open(ENV):
+    line = line.strip()
+    if line and not line.startswith("#") and "=" in line:
+        k, v = line.split("=", 1)
+        cfg[k] = v
+HOST = cfg["CANVAS_HOST"].rstrip("/")
+TOK = cfg["CANVAS_TOKEN"]
+
+def api(path, paginate=True):
+    """GET a Canvas API path, following Link rel=next."""
+    out, url = [], HOST + path
+    while url:
+        req = urllib.request.Request(url, headers={"Authorization": "Bearer " + TOK})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            data = json.load(r)
+            link = r.headers.get("Link", "")
+        if isinstance(data, dict):
+            return data
+        out.extend(data)
+        url = None
+        if paginate:
+            m = re.search(r'<([^>]+)>;\s*rel="next"', link)
+            if m:
+                url = m.group(1)
+    return out
+
+def courses():
+    return api("/api/v1/courses?enrollment_state=active&per_page=100"
+               "&include[]=term&include[]=teachers&include[]=total_scores")
+
+def resolve(token):
+    """Accept a course id, course code fragment, or name fragment."""
+    if token.isdigit():
+        return int(token)
+    t = token.lower()
+    for c in courses():
+        if t in (c.get("course_code") or "").lower() or t in (c.get("name") or "").lower():
+            return c["id"]
+    sys.exit(f"no course matching {token!r}")
+
+def label(cid, cache={}):
+    if not cache:
+        for c in courses():
+            cache[c["id"]] = c.get("course_code") or c.get("name")
+    return cache.get(cid, str(cid))
+
+def dt(s):
+    return datetime.datetime.fromisoformat(s.replace("Z", "+00:00")) if s else None
+
+def local(d):
+    return d.astimezone().strftime("%a %d %b, %H:%M") if d else "no due date"
+
+def cmd_courses():
+    for c in courses():
+        en = (c.get("enrollments") or [{}])[0]
+        sc = en.get("computed_current_score")
+        gr = en.get("computed_current_grade") or ""
+        t = ", ".join(x.get("display_name", "") for x in c.get("teachers", []))
+        score = f"{sc}% {gr}".strip() if sc is not None else "no grade yet"
+        print(f"{c['id']:<6} {(c.get('course_code') or ''):<12} {c.get('name','')}")
+        print(f"       {t}  |  {score}")
+
+def cmd_upcoming(days=14):
+    now = datetime.datetime.now(datetime.timezone.utc)
+    end = now + datetime.timedelta(days=int(days))
+    rows = []
+    for c in courses():
+        for a in api(f"/api/v1/courses/{c['id']}/assignments?per_page=100&include[]=submission"):
+            d = dt(a.get("due_at"))
+            if d and now <= d <= end:
+                sub = a.get("submission") or {}
+                done = bool(sub.get("submitted_at"))
+                rows.append((d, c.get("course_code") or "", a["name"],
+                             a.get("points_possible"), done, a.get("html_url")))
+    rows.sort()
+    if not rows:
+        print(f"nothing due in the next {days} days")
+        return
+    for d, code, name, pts, done, url in rows:
+        left = (d - now)
+        hrs = left.total_seconds() / 3600
+        when = f"{int(hrs)}h" if hrs < 48 else f"{int(hrs//24)}d"
+        mark = "DONE" if done else "    "
+        print(f"{mark} {local(d):<20} in {when:<5} {code:<10} {str(pts or ''):>5}pt  {name}")
+        print(f"      {url}")
+
+def cmd_todo():
+    for t in api("/api/v1/users/self/todo"):
+        a = t.get("assignment") or {}
+        print(f"{label(t.get('course_id')):<10} {local(dt(a.get('due_at'))):<20} {a.get('name', t.get('type'))}")
+
+def cmd_assignments(which):
+    cid = resolve(which)
+    rows = api(f"/api/v1/courses/{cid}/assignments?per_page=100&include[]=submission")
+    rows.sort(key=lambda a: a.get("due_at") or "zzzz")
+    for a in rows:
+        sub = a.get("submission") or {}
+        sc = sub.get("score")
+        got = f"{sc}/{a.get('points_possible')}" if sc is not None else f"-/{a.get('points_possible')}"
+        print(f"{local(dt(a.get('due_at'))):<20} {got:>10}  {a['name']}")
+
+def cmd_grades():
+    for c in courses():
+        en = (c.get("enrollments") or [{}])[0]
+        sc = en.get("computed_current_score")
+        print(f"{(c.get('course_code') or ''):<12} {str(sc) + '%' if sc is not None else 'n/a':<8} {c.get('name','')}")
+
+def cmd_announcements(days=14):
+    ctx = "&".join(f"context_codes[]=course_{c['id']}" for c in courses())
+    start = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=int(days))).date()
+    for a in api(f"/api/v1/announcements?{ctx}&start_date={start}&per_page=50"):
+        body = re.sub(r"<[^>]+>", " ", a.get("message") or "")
+        body = re.sub(r"\s+", " ", body).strip()
+        print(f"[{a.get('posted_at','')[:10]}] {a.get('title')}")
+        print(f"   {body[:400]}\n")
+
+def cmd_modules(which):
+    cid = resolve(which)
+    for m in api(f"/api/v1/courses/{cid}/modules?per_page=100&include[]=items"):
+        print(f"\n## {m['name']}  [{m.get('state','')}]")
+        for it in m.get("items", []):
+            print(f"   {it.get('type',''):<14} {it.get('title','')}")
+
+def cmd_files(which):
+    cid = resolve(which)
+    for f in api(f"/api/v1/courses/{cid}/files?per_page=100&sort=created_at&order=desc"):
+        print(f"{f.get('created_at','')[:10]}  {f.get('size',0)//1024:>6}KB  {f.get('display_name')}")
+        print(f"   {f.get('url','').split('?')[0]}")
+
+def cmd_raw(path):
+    print(json.dumps(api(path), indent=2)[:20000])
+
+CMDS = {"courses": cmd_courses, "upcoming": cmd_upcoming, "todo": cmd_todo,
+        "assignments": cmd_assignments, "grades": cmd_grades,
+        "announcements": cmd_announcements, "modules": cmd_modules,
+        "files": cmd_files, "raw": cmd_raw}
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2 or sys.argv[1] not in CMDS:
+        sys.exit(__doc__)
+    CMDS[sys.argv[1]](*sys.argv[2:])

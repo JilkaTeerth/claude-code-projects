@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Money</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=IBM+Plex+Mono:wght@400;500;700&family=Anton&display=swap" rel="stylesheet">
+<style>
+/* Cool paper, ink navy. Need / want / impulse keep one colour each everywhere. */
+:root{
+  color-scheme: light;
+  --plane:#eef2f4; --surface:#ffffff; --ink:#14212b; --ink-2:#4e5b66; --muted:#7d8a94;
+  --hair:#dce3e8; --track:#e3e9ed; --focus:#2a78d6; --paper:#fffdf7; --paper-ink:#25221d; --paper-mute:#8a8273;
+  --good:#0a7f2e; --good-wash:#e3f3e8; --warn:#9a6400; --bad:#c23434; --bad-wash:#fbe6e6;
+  --need:#1baf7a; --want:#2a78d6; --impulse:#eb6834; --wish:#d55181;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  color-scheme: dark;
+  --plane:#0f1519; --surface:#172026; --ink:#eaf0f3; --ink-2:#a9b6bf; --muted:#7f8d97;
+  --hair:#26323a; --track:#223039; --focus:#6da7ec; --paper:#f4efe3; --paper-ink:#25221d; --paper-mute:#7d7566;
+  --good:#4cc46e; --good-wash:#15291d; --warn:#e2a64a; --bad:#ec6f6f; --bad-wash:#321a1a;
+  --need:#199e70; --want:#3987e5; --impulse:#d95926; --wish:#d55181;
+}}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --plane:#0f1519; --surface:#172026; --ink:#eaf0f3; --ink-2:#a9b6bf; --muted:#7f8d97;
+  --hair:#26323a; --track:#223039; --focus:#6da7ec; --paper:#f4efe3; --paper-ink:#25221d; --paper-mute:#7d7566;
+  --good:#4cc46e; --good-wash:#15291d; --warn:#e2a64a; --bad:#ec6f6f; --bad-wash:#321a1a;
+  --need:#199e70; --want:#3987e5; --impulse:#d95926; --wish:#d55181;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--plane);color:var(--ink);font:400 16px/1.5 "Bricolage Grotesque",system-ui,sans-serif}
+.wrap{max-width:1080px;margin:0 auto;padding:18px 16px 96px}
+.tab{font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:4px}
+button{font:inherit;font-size:14px;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--hair);border-radius:999px;padding:6px 14px;cursor:pointer}
+button:hover{border-color:var(--muted)}
+input{font:inherit;color:var(--ink);background:var(--plane);border:1px solid var(--hair);border-radius:10px;padding:7px 10px}
+
+/* forest: the week's photo, colour drains as the week's money goes */
+.forest{position:fixed;inset:0;z-index:-2;background:#1d2a22 center/cover no-repeat;
+  filter:saturate(var(--life,1)) brightness(calc(.7 + .3*var(--life,1)));transition:filter 1.2s ease}
+.veil{position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,rgba(8,14,12,.4) 0,rgba(8,14,12,.45) 34vh,var(--plane) 78vh)}
+
+.top{display:flex;align-items:baseline;gap:12px;margin-bottom:18px;color:#fff;text-shadow:0 1px 10px rgba(0,0,0,.4)}
+.top .mark{font-weight:750;font-size:18px;letter-spacing:-.02em}
+.top .grow{flex:1}
+.top .place{font-size:13px;opacity:.8}
+
+/* hero: the pot */
+.hero{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.35),0 2px 16px rgba(0,0,0,.25);margin-bottom:22px}
+.hero .big{margin:0;font-size:clamp(38px,7vw,64px);line-height:1;font-weight:800;letter-spacing:-.035em;font-stretch:86%}
+.hero .big small{font-size:.42em;font-weight:500;letter-spacing:-.01em;opacity:.85}
+.hero .sub{margin:8px 0 0;font-size:clamp(16px,2.2vw,19px);opacity:.92}
+.hero .sub b{font-weight:700}
+.wkline{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-top:16px}
+.days{display:flex;gap:6px}
+.days .d{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:11.5px;font-weight:700;border:1.5px solid rgba(255,255,255,.55);color:#fff;text-shadow:none}
+.days .d.zero{background:#3fbf6a;border-color:#3fbf6a}
+.days .d.spent{background:rgba(255,255,255,.2)}
+.days .d.future,.days .d.before{opacity:.45;border-style:dashed}
+.days .d.today{box-shadow:0 0 0 3px rgba(255,255,255,.35)}
+.wkbar{flex:1 1 240px;min-width:200px}
+.wkbar .track{height:10px;border-radius:5px;background:rgba(255,255,255,.25);overflow:hidden;display:flex}
+.wkbar .track i{display:block;height:100%}
+.wkbar .lab{display:flex;justify-content:space-between;font-size:13.5px;margin-top:5px;opacity:.9}
+
+/* THE input */
+.inbox{background:var(--surface);border-radius:24px;padding:20px;box-shadow:0 18px 50px rgba(8,14,12,.18);margin-bottom:30px}
+.inbox label.q{display:block;font-size:14px;font-weight:600;color:var(--muted);margin:0 0 8px}
+.inbox input.what{width:100%;font-size:clamp(24px,4vw,34px);font-weight:650;letter-spacing:-.02em;padding:12px 16px;border-radius:16px;border:2px solid var(--hair);background:var(--plane)}
+.inbox input.what:focus{border-color:var(--ink);outline:none}
+.picks{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+@media (max-width:560px){ .picks{grid-template-columns:repeat(2,1fr)} }
+.picks button{border:2px solid var(--hair);border-radius:16px;padding:12px 10px;font-size:18px;font-weight:750;display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;transition:transform .08s}
+.picks button small{font-size:12.5px;font-weight:450;color:var(--muted)}
+.picks button:hover{border-color:var(--c)}
+.picks button:active{transform:scale(.97)}
+.picks button span{color:var(--c)}
+.inbox.nudge .picks button{animation:wig .4s}
+@keyframes wig{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+.today{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;margin:0 0 10px}
+.today .tl{font-size:clamp(20px,3vw,26px);font-weight:750;letter-spacing:-.02em}
+.today .tl b{color:var(--good)} .today .tl b.neg{color:var(--bad)}
+.today .ts{font-size:14.5px;color:var(--muted)}
+.today .yo{flex-basis:100%;font-size:15px;font-weight:650;color:#06210f;background:linear-gradient(90deg,#bff0cf,#e6f9ec);border-radius:10px;padding:6px 12px;margin-top:4px}
+.can{min-height:0;margin-top:10px;font-size:16px;font-weight:600;border-radius:12px;padding:0 14px;transition:padding .15s}
+.can:not(:empty){padding:10px 14px}
+.can.yes{background:var(--good-wash);color:var(--good)}
+.can.meh{background:#fbf0d6;color:#8a5a00}
+.can.no{background:var(--bad-wash);color:var(--bad)}
+.can small{display:block;font-weight:450;font-size:14px;opacity:.9}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .can.meh{background:#2d2414;color:#e2a64a} }
+.toast{margin-top:14px;padding:12px 14px;border-radius:14px;background:var(--plane);font-size:15.5px;color:var(--ink-2);border-left:4px solid var(--c,var(--ink))}
+.toast b{display:block;font-size:19px;color:var(--ink);letter-spacing:-.01em}
+.toast .undo{float:right;margin-left:10px;padding:3px 10px;font-size:13px}
+
+/* receipts */
+.trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-items:start}
+@media (max-width:860px){ .trio{grid-template-columns:minmax(0,1fr)} }
+.receipt{background:var(--paper);color:var(--paper-ink);font:400 13.5px/1.55 "IBM Plex Mono",ui-monospace,monospace;padding:20px 22px 30px 18px;
+  box-shadow:0 1px 2px rgba(0,0,0,.08),0 10px 28px rgba(0,0,0,.08);position:relative;text-transform:uppercase;letter-spacing:.02em;
+  -webkit-mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/14px 100%;mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/14px 100%}
+.receipt .hd{text-align:center;margin-bottom:6px}
+.receipt .hd b{display:block;font-size:19px;font-weight:700;letter-spacing:.12em}
+.receipt .hd .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--c);margin-right:7px;vertical-align:1px}
+.receipt .meta{text-align:center;color:var(--paper-mute);font-size:12px}
+.rule{border:0;border-top:1.5px dashed #c9c1b0;margin:10px 0}
+.line{display:flex;gap:6px;align-items:baseline;position:relative}
+.line .dt{color:var(--paper-mute);flex:none;width:6.6ch;white-space:nowrap}
+.line .nm{flex:1;min-width:0;overflow:hidden;white-space:nowrap}
+.line .nm::after{content:" ........................................................";color:#cfc7b6}
+.line .am{flex:none;font-weight:500}
+.line .del{position:absolute;right:-18px;top:0;border:0;background:none;padding:0 2px;color:var(--paper-mute);opacity:0;font-size:15px;line-height:1.4}
+.line:hover .del,.line .del:focus{opacity:1}
+@media (hover:none){ .line .del{opacity:.6} }
+.stamp{display:inline-block;font-size:10px;font-weight:700;color:var(--impulse);border:1.5px solid var(--impulse);border-radius:3px;padding:0 3px;line-height:1.3;transform:rotate(-4deg);margin-left:4px;vertical-align:1px}
+.tot{display:flex;justify-content:space-between;font-weight:700}
+.tot.sm{font-weight:400;color:var(--paper-mute)}
+.receipt .empty{color:var(--paper-mute);text-align:center;margin:10px 0}
+.receipt .earlier{display:block;margin:6px auto 0;border:0;background:none;font:inherit;color:var(--paper-mute);text-transform:uppercase;font-size:12px;padding:2px}
+.wk{color:var(--paper-mute);font-size:11.5px;margin:8px 0 2px}
+.thanks{text-align:center;color:var(--paper-mute);font-size:12px;margin-top:12px}
+.barcode{height:28px;margin:12px auto 0;width:70%;background:repeating-linear-gradient(90deg,var(--paper-ink) 0 2px,transparent 2px 4px,var(--paper-ink) 4px 5px,transparent 5px 8px,var(--paper-ink) 8px 11px,transparent 11px 12px);opacity:.75}
+.witem{margin:8px 0 12px}
+.witem .l1{display:flex;justify-content:space-between;gap:8px;font-weight:700}
+.witem .pg{font-size:13px;letter-spacing:0;white-space:nowrap;overflow:hidden}
+.witem .eta{color:var(--paper-mute);font-size:12px}
+.witem .ready{color:var(--good);font-weight:700}
+.witem button{font:inherit;text-transform:uppercase;font-size:12px;font-weight:700;border:1.5px solid var(--paper-ink);background:none;color:var(--paper-ink);border-radius:3px;padding:1px 8px;margin-top:4px}
+.witem button.go{background:var(--paper-ink);color:var(--paper)}
+.witem.bought{opacity:.5;text-decoration:line-through}
+
+.hero .runway{font-size:1.25em;letter-spacing:-.01em}
+.chip{display:inline-block;margin-left:6px;padding:2px 10px;border-radius:999px;font-size:14px;font-weight:700;text-shadow:none;vertical-align:2px}
+.chip.up{background:#3fbf6a;color:#06210f} .chip.down{background:#ffb4a8;color:#3a0b05}
+.wkbar .track{position:relative}
+.wkbar .usual{position:absolute;top:-3px;bottom:-3px;width:2px;background:#fff;opacity:.9}
+.line.ok .nm,.line.ok .am{color:var(--good);font-weight:700}
+.line.free .nm,.line.free .am{color:#5a6f8a}
+.line.free .nm{white-space:normal}.line.free .nm::after{content:""}
+.addalt,.soft{border-color:var(--paper-mute) !important;color:var(--paper-mute) !important}
+.wbtns{display:flex;gap:6px;flex-wrap:wrap}
+.altform{display:flex;gap:6px;margin-top:4px}
+.altform input{flex:1;min-width:0;font:inherit;font-size:12px;text-transform:none;background:#fff;border:1.5px solid var(--paper-ink);border-radius:3px;padding:2px 6px;color:var(--paper-ink)}
+.altform button{font:inherit;font-size:12px;text-transform:uppercase;font-weight:700;border:1.5px solid var(--paper-ink);background:var(--paper-ink);color:var(--paper);border-radius:3px;padding:1px 8px}
+
+.insights{margin-top:30px}
+.insights h2{font-size:19px;margin:0 0 12px;letter-spacing:-.01em}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.cards .card{background:var(--surface);border:1px solid var(--hair);border-radius:18px;padding:14px 16px}
+.cards .k{margin:0;font-size:12.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.cards .v{margin:4px 0 2px;font-size:24px;font-weight:750;letter-spacing:-.02em;line-height:1.15}
+.cards .s{margin:0;font-size:14.5px;color:var(--ink-2)}
+
+/* check-in + drawers */
+.checkin{margin-top:34px}
+.checkin h2{font-size:19px;margin:0 0 8px;letter-spacing:-.01em}
+.checkin p{margin:0 0 8px;color:var(--ink-2);max-width:70ch}
+.checkin p b{color:var(--ink)}
+.checkin .lead{font-size:18px;color:var(--ink);font-weight:600}
+.fbar{display:flex;height:9px;border-radius:5px;overflow:hidden;background:var(--track);margin:6px 0;gap:2px;max-width:520px}
+.fbar i{display:block;height:100%}
+.fleg{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:14px;color:var(--ink-2)}
+.fleg span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:10px;height:10px;border-radius:3px;display:inline-block}
+details{border-top:1px solid var(--hair);padding:14px 2px}
+details:last-of-type{border-bottom:1px solid var(--hair)}
+details summary{cursor:pointer;list-style:none;font-weight:650;font-size:17px;display:flex;align-items:center}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:"";margin-left:auto;width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg)}
+details[open] summary::after{transform:rotate(-135deg)}
+details .body{padding-top:12px;color:var(--ink-2)}
+.steps{margin:6px 0 0;padding-left:20px}
+.steps li{margin:0 0 8px}
+.drawers{margin-top:30px}
+.potform{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.potform label{display:flex;flex-direction:column;font-size:13.5px;gap:4px}
+
+/* the ceremony */
+.cer{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:20px;overflow:auto;background:#0c1410;opacity:0;transition:opacity .5s}
+.cer.on{opacity:1}
+.cer canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+.cer .card{position:relative;max-width:560px;width:100%;text-align:center;color:#fff}
+.cer .k{font-size:14px;letter-spacing:.14em;text-transform:uppercase;opacity:.8;margin:0 0 8px}
+.cer h3{margin:0 0 14px;font-size:clamp(30px,6vw,54px);line-height:1.02;letter-spacing:-.03em;font-weight:800;font-stretch:86%}
+.cer .why{font-size:17px;opacity:.9;margin:14px auto 20px;max-width:44ch}
+.cer .btns{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.cer .btns button{font-size:16px;padding:10px 22px;border:0}
+.cer .btns .main{background:#fff;color:#14212b}
+.cer .btns .ghost{background:rgba(255,255,255,.14);color:#fff}
+.meme{position:relative;display:inline-block;max-width:100%;border-radius:10px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.meme img{display:block;max-width:100%;max-height:46vh;width:auto}
+.meme .cap{position:absolute;left:4%;right:4%;font-family:Impact,Anton,"Arial Narrow",sans-serif;color:#fff;text-transform:uppercase;
+  font-size:clamp(20px,4.4vw,36px);line-height:1.05;letter-spacing:.01em;
+  -webkit-text-stroke:2px #000;paint-order:stroke fill;text-shadow:0 0 6px rgba(0,0,0,.6)}
+.meme .cap.t{top:3%} .meme .cap.b{bottom:4%}
+.cer.wish .card h3{background:linear-gradient(90deg,#ffd66b,#ff8fb4,#9fe3ff,#ffd66b);background-size:300%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 3s linear infinite}
+@keyframes shine{to{background-position:300% 0}}
+@media (prefers-reduced-motion:no-preference){ .cer.on .card{animation:pop .7s .15s cubic-bezier(.2,.9,.25,1.2) both}
+  @keyframes pop{from{opacity:0;transform:scale(.85) translateY(20px)}} .cer.fail.on .meme{animation:shake .5s .8s} @keyframes shake{20%,60%{transform:rotate(-2deg)}40%,80%{transform:rotate(2deg)}} }
+
+#tip{position:fixed;z-index:9;pointer-events:none;background:var(--ink);color:var(--plane);font-size:13.5px;padding:6px 10px;border-radius:8px;white-space:nowrap;opacity:0;transform:translate(-50%,calc(-100% - 10px))}
+#tip.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="forest" id="forest"></div><div class="veil"></div>
+<div class="wrap">
+  <div class="top"><span class="mark">Money</span><span class="grow"></span><span class="place" id="place"></span></div>
+
+  <section class="hero" id="hero" aria-live="polite"></section>
+
+  <section class="inbox" id="box">
+    <div class="today" id="today"></div>
+    <input class="what" id="what" placeholder="snack 6, or chipotle 14" autocomplete="off" autofocus aria-label="What did you spend, or what do you want">
+    <div class="can" id="can" aria-live="polite"></div>
+    <div class="picks" id="picks">
+      <button data-feel="need" style="--c:var(--need)"><span>Need</span><small>had to</small></button>
+      <button data-feel="want" style="--c:var(--want)"><span>Want</span><small>chose it</small></button>
+      <button data-feel="impulse" style="--c:var(--impulse)"><span>Impulse</span><small>didn't plan it</small></button>
+      <button data-feel="wish" style="--c:var(--wish)"><span>Wishlist</span><small>saving for it</small></button>
+    </div>
+    <div id="toast"></div>
+  </section>
+
+  <div class="trio">
+    <div class="receipt" id="rNeed" style="--c:var(--need)"></div>
+    <div class="receipt" id="rWant" style="--c:var(--want)"></div>
+    <div class="receipt" id="rWish" style="--c:var(--wish)"></div>
+  </div>
+
+  <section class="checkin" id="checkin"></section>
+  <section class="insights" id="insights"></section>
+
+  <div class="drawers">
+    <details><summary id="reportTitle">This month's report so far</summary><div class="body" id="report"></div></details>
+    <details><summary>The pot</summary><div class="body">
+      <p style="margin-top:0">Everything you have. Got more money in, or counted wrong? Change it here and the date recalculates.</p>
+      <form class="potform" id="potForm">
+        <label>Pot ($)<input name="pot" inputmode="decimal" style="width:120px"></label>
+        <button>Save</button>
+      </form></div></details>
+  </div>
+</div>
+<div id="tip" role="tooltip"></div>
+<div class="cer" id="cer" hidden><canvas id="fx"></canvas><div class="card" id="cerCard" role="dialog" aria-modal="true"></div></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const money = n => (n < 0 ? "-$" : "$") + Math.abs(n).toFixed(2);
+const m0 = n => (n < 0 ? "-$" : "$") + Math.round(Math.abs(n));
+const post = (p, b) => fetch(p, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(b||{})})
+  .then(async r => { const j = await r.json(); if (!r.ok) throw new Error(j.error); return j; });
+const D = s => new Date(s + "T12:00");
+const iso = d => new Date(d - d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const MON = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+const short = s => { const d = D(s); return String(d.getDate()).padStart(2,"0") + " " + MON[d.getMonth()]; };
+const FEEL = {need:"Need", want:"Want", impulse:"Impulse"};
+let S, open = {need:false, want:false}, cerOn = false;
+
+// ---------------- forests ----------------
+let FORESTS = [], FOREST = {name:"", file:""};
+function pickForest(){
+  if (!FORESTS.length) return;
+  const wk = Math.floor((Date.now() - Date.UTC(2026,0,5)) / (7*864e5));
+  FOREST = FORESTS[((wk % FORESTS.length) + FORESTS.length) % FORESTS.length];
+  $("#forest").style.backgroundImage = `url("/img/${FOREST.file}")`;
+}
+
+async function load(){ S = await (await fetch("/api/summary")).json(); render(); }
+
+function render(){
+  const L = S.ledger, w = L.week, g = S.goal;
+  const usual = L.rate_week || 1;
+  const life = Math.max(.15, Math.min(1, 1 - w.spent / (usual * 1.4) * .85));
+  document.documentElement.style.setProperty("--life", life.toFixed(3));
+  $("#place").textContent = FOREST.name;
+
+  // hero: the pot, and the day it runs out at the rate he really spends
+  const thisWk = S.tx.filter(t => t.date >= w.week && t.verdict !== "wish");
+  const scale = Math.max(usual, w.spent);
+  const segs = ["need","want","impulse"].map(k => {
+    const amt = thisWk.filter(t => t.feel === k).reduce((a,t) => a + t.amount, 0);
+    return amt ? `<i style="width:${amt / scale * 100}%;background:var(--${k})" data-tip="${FEEL[k]}: ${money(amt)}"></i>` : "";
+  }).join("");
+  const days = S.days.map(d => {
+    const cls = d.before ? "before" : d.future ? "future" : d.spent > 0 ? "spent" : "zero";
+    const tip = d.before ? "before you started" : d.future ? "still ahead" : d.spent > 0 ? `${money(d.spent)} out` : "no-spend day";
+    return `<span class="d ${cls} ${d.d===S.today?"today":""}" tabindex="0" data-tip="${D(d.d).toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"})}: ${tip}">${d.label}</span>`;
+  }).join("");
+  const B = L.budget;
+  const yo = B.today_left >= B.base_day * 1.5 && B.quiet >= 1;
+  $("#today").innerHTML = B.today_left >= 0
+    ? `<span class="tl">Today you've got <b class="tab">${money(B.today_left)}</b></span>
+       <span class="ts tab">Every day earns ${money(B.base_day)}${B.stacked > 0.5 ? `, ${money(B.stacked)} stacked from quiet days` : ""}${B.today_spent ? `, ${money(B.today_spent)} already out today` : ""}. Built to last past ${esc(B.floor_label)}.</span>
+       ${yo ? `<span class="yo">yo, ${B.quiet} quiet day${B.quiet > 1 ? "s" : ""} stacked. You could technically spend ${money(B.today_left)} today.</span>` : ""}`
+    : `<span class="tl">Today you've got <b class="tab neg">$0</b></span>
+       <span class="ts tab">You're ${money(-B.today_left)} past the line, so every day till ${esc(B.floor_label)} is ${money(B.next_day)} instead of ${money(B.base_day)}. Quiet days win it back.</span>`;
+  canI();
+  const mv = L.moved_week;
+  $("#hero").innerHTML = `
+    <p class="big tab">${money(L.balance)} <small>left</small></p>
+    <p class="sub">At your pace that lasts till <b class="runway">${esc(L.runway_label)}</b>.
+      <span class="chip ${B.on_track ? "up" : "down"}">${B.on_track ? `on track past ${esc(B.floor_label)}` : `short of ${esc(B.floor_label)}`}</span>
+      ${mv ? `<span class="chip ${mv > 0 ? "up" : "down"}">${mv > 0 ? "+" : ""}${mv} day${Math.abs(mv) === 1 ? "" : "s"} this week</span>` : ""}</p>
+    <div class="wkline">
+      <div class="days">${days}</div>
+      <div class="wkbar"><div class="track">${segs}<span class="usual" style="left:${usual / scale * 100}%" data-tip="Your usual week: ${money(usual)}"></span></div>
+        <div class="lab tab"><span><b>${money(w.spent)}</b> this week</span><span>usual week ${money(usual)}</span></div></div>
+    </div>`;
+
+  // receipts
+  const lines = rows => rows.map(t => `<div class="line"><span class="dt">${short(t.date)}</span>
+      <span class="nm">${esc(t.name)}${t.feel==="impulse"?'<span class="stamp">impulse</span>':""}</span>
+      <span class="am tab">${t.amount.toFixed(2)}</span>
+      <button class="del" data-del="${esc(t.id)}" aria-label="Delete ${esc(t.name)}" title="Delete">×</button></div>`).join("");
+  const sum = a => a.reduce((x,t) => x + t.amount, 0);
+  const receipt = (key, title, rows) => {
+    const now = rows.filter(t => t.date >= w.week), old = rows.filter(t => t.date < w.week);
+    let olderHtml = "";
+    if (old.length && open[key]){
+      const byWk = {};
+      old.forEach(t => { const d = D(t.date); d.setDate(d.getDate() - ((d.getDay()+6)%7)); (byWk[iso(d)] ||= []).push(t); });
+      olderHtml = Object.entries(byWk).map(([k, a]) => `<div class="wk">WEEK OF ${short(k)}</div>${lines(a)}`).join("");
+    }
+    return `<div class="hd"><b><span class="dot"></span>${title}</b></div>
+      <div class="meta">WEEK OF ${short(w.week)}</div><hr class="rule">
+      ${now.length ? lines(now) : `<p class="empty">NOTHING THIS WEEK</p>`}
+      <hr class="rule">
+      <div class="tot tab"><span>THIS WEEK</span><span>${money(sum(now))}</span></div>
+      <div class="tot sm tab"><span>SINCE ${short(L.start)}</span><span>${money(sum(rows))}</span></div>
+      ${old.length ? `<button class="earlier" data-open="${key}">${open[key] ? "HIDE EARLIER ▴" : `EARLIER WEEKS (${old.length}) ▾`}</button>${olderHtml}` : ""}
+      <div class="barcode" aria-hidden="true"></div>`;
+  };
+  const spends = S.tx.filter(t => t.verdict !== "wish");
+  $("#rNeed").innerHTML = receipt("need", "NEEDS", spends.filter(t => t.feel === "need"));
+  $("#rWant").innerHTML = receipt("want", "WANTS", spends.filter(t => t.feel !== "need"));
+
+  // wishlist receipt: what each price costs in days of money, next to the free option
+  const bar = (have, need) => { const n = 12, f = Math.round(Math.min(1, need ? have / need : 0) * n); return "▓".repeat(f) + "░".repeat(n - f); };
+  $("#rWish").innerHTML = `<div class="hd"><b><span class="dot"></span>WISHLIST</b></div>
+    <div class="meta">PRICED IN DAYS OF MONEY</div><hr class="rule">
+    ${S.wishes.length ? S.wishes.map(x => x.bought_tx
+      ? `<div class="witem bought"><div class="l1"><span>${esc(x.name)}</span><span>BOUGHT</span></div></div>`
+      : `<div class="witem"><div class="l1"><span>${esc(x.name)}${x.where_ ? ` <span style="font-weight:400;color:var(--paper-mute)">@${esc(x.where_)}</span>` : ""}</span>
+          <span class="tab">${x.hi > x.lo ? `${Math.round(x.lo)}–${Math.round(x.hi)}` : x.hi.toFixed(2)}</span></div>
+        ${x.prices.map(p => `<div class="line ${p.ok ? "ok" : ""}"><span class="nm">BUY AT $${p.p}</span><span class="am tab">${p.days} DAYS</span></div>`).join("")}
+        ${x.alt ? `<div class="line free"><span class="nm">OR WAIT: ${esc(x.alt)}</span><span class="am">FREE</span></div>`
+                : `<button class="addalt" data-alt="${x.id}">+ free option</button>`}
+        <div class="pg tab" style="margin-top:6px">EARNED [${bar(x.earned, x.need_days)}] ${x.earned}/${x.need_days} DAYS</div>
+        ${x.ready ? `<div class="ready">★ YOU'VE EARNED IT AT $${Math.round(x.prices.filter(p => p.ok).pop().p)} ★</div>`
+                  : `<div class="eta">SPEND ~$${x.shave} LESS A WEEK, EARNED IN ~4 WEEKS</div>`}
+        <div class="wbtns">${x.ready ? `<button class="go" data-buy="${x.id}">I bought it</button>` : ""}<button data-unwish="${x.id}" class="soft">remove</button></div></div>`).join("")
+      : `<p class="empty">TYPE "BEATS PILL 50-70"<br>THEN TAP WISHLIST</p>`}
+    <hr class="rule">
+    <div class="thanks">EARNED = HOW MANY DAYS LATER YOUR<br>MONEY RUNS OUT SINCE YOU WANTED IT.<br>EARN ITS DAYS AND IT'S FREE, EFFECTIVELY.</div>
+    <div class="barcode" aria-hidden="true"></div>`;
+
+  // weekly check-in: this week's pace in dates, and how last week moved the date
+  const lw = S.last_week;
+  const paceLine = !w.spent ? `Nothing out yet this week. Every quiet day pushes ${esc(L.runway_label)} later.`
+    : w.proj <= usual ? `On pace for ${money(w.proj)} this week, under your usual ${money(usual)}. That pushes the date later.`
+    : `On pace for ${money(w.proj)} this week against a usual ${money(usual)}. Finish like this and the date comes in.`;
+  $("#checkin").innerHTML = `<h2>This week's check-in</h2>
+    <p class="lead">${paceLine}</p>
+    ${L.spent_total ? `<p>You're spending <b>${money(L.rate_day)}</b> a day on average, <b>${money(usual)}</b> a week. ${money(L.balance)} at that rate is <b>${L.runway_days} days</b>, so ${esc(L.runway_label)}.</p>`
+      : `<p>Nothing logged yet, so the date is a starting guess at about $58 a week. It sharpens with every entry.</p>`}
+    ${lw ? `<p style="margin-top:14px"><b>Last week (${esc(lw.label)}):</b> spent ${money(lw.spent)} and moved the date ${lw.moved >= 0 ? `<b style="color:var(--good)">${lw.moved} day${lw.moved === 1 ? "" : "s"} later</b>` : `<b style="color:var(--bad)">${-lw.moved} day${lw.moved === -1 ? "" : "s"} earlier</b>`}, ${esc(lw.before)} to ${esc(lw.after)}.</p>${feelBar(S.last_week_feels)}` : ""}`;
+
+  $("#insights").innerHTML = S.insights.length ? `<h2>What your spending says</h2><div class="cards">${S.insights.map(x =>
+    `<div class="card"><p class="k">${esc(x.k)}</p><p class="v">${esc(x.big)}</p><p class="s">${esc(x.sub)}</p></div>`).join("")}</div>` : "";
+
+  const rp = S.report;
+  $("#reportTitle").textContent = `${rp.label} report so far`;
+  $("#report").innerHTML = rp.n ? `<p style="margin-top:0">${rp.n} spends, <b>${money(rp.spent)}</b>.${rp.cats[0] ? ` Most on ${esc(rp.cats[0].cat.toLowerCase())} (${money(rp.cats[0].amt)}).` : ""}</p>${feelBar(rp.feels)}
+    <p style="margin:14px 0 0"><b>Steps for ${esc(rp.next)}</b></p><ol class="steps">${rp.steps.map(x => `<li>${esc(x)}</li>`).join("")}</ol>`
+    : `<p style="margin:0">Nothing logged in ${esc(rp.label)} yet.</p>`;
+  const pf = $("#potForm"); if (document.activeElement.form !== pf) pf.pot.value = L.pot;
+
+  document.querySelectorAll("[data-del]").forEach(b => b.onclick = () => post("/api/delete", {id:b.dataset.del}).then(load));
+  document.querySelectorAll("[data-open]").forEach(b => b.onclick = () => { open[b.dataset.open] = !open[b.dataset.open]; render(); });
+  document.querySelectorAll("[data-unwish]").forEach(b => b.onclick = () => post("/api/unwish", {wish_id:+b.dataset.unwish}).then(load));
+  document.querySelectorAll("[data-buy]").forEach(b => b.onclick = () => buyFlow(+b.dataset.buy));
+  document.querySelectorAll("[data-alt]").forEach(b => b.onclick = () => {
+    b.outerHTML = `<form class="altform" data-altf="${b.dataset.alt}"><input placeholder="Bose from home, back in Jan" aria-label="Free option"><button>save</button></form>`;
+    const f = document.querySelector(`[data-altf="${b.dataset.alt}"]`); f.querySelector("input").focus();
+    f.onsubmit = e => { e.preventDefault(); post("/api/alt", {wish_id:+f.dataset.altf, alt:f.querySelector("input").value}).then(load); };
+  });
+
+  if (S.ceremony && !cerOn && !new URLSearchParams(location.search).get("ceremony")) ceremony(S.ceremony, false);
+}
+
+function buyFlow(id){
+  const x = S.wishes.find(w => w.id === id), el = document.querySelector(`[data-buy="${id}"]`);
+  el.outerHTML = `<form class="altform" data-buyf="${id}"><input inputmode="decimal" value="${Math.round(x.lo)}" aria-label="What you paid" style="width:70px"><button>paid this</button></form>`;
+  const f = document.querySelector(`[data-buyf="${id}"]`); f.querySelector("input").select();
+  f.onsubmit = e => { e.preventDefault(); post("/api/buy", {wish_id:id, price:+f.querySelector("input").value}).then(load); };
+}
+
+function feelBar(fs){
+  if (!fs) return "";
+  const ks = ["need","want","impulse"], tot = ks.reduce((a,k) => a + fs[k].amt, 0);
+  if (!tot) return "";
+  return `<div class="fbar">${ks.filter(k => fs[k].amt).map(k => `<i style="width:${fs[k].amt/tot*100}%;background:var(--${k})"></i>`).join("")}</div>
+    <div class="fleg">${ks.filter(k => fs[k].n).map(k => `<span><i class="sw" style="background:var(--${k})"></i>${FEEL[k]} ${money(fs[k].amt)}</span>`).join("")}</div>`;
+}
+
+// ---------------- can I? answers live while he types, before he's spent anything ----------------
+function canI(){
+  const el = $("#can"); if (!S) return;
+  const t = $("#what").value, m = t.match(/\$?(\d+(?:\.\d{1,2})?)(?!.*\d)/);
+  if (!m || /\d\s*(-|–|to)\s*\$?\d/.test(t)){ el.className = "can"; el.innerHTML = ""; return; }
+  const a = +m[1], B = S.ledger.budget, days = a / (S.ledger.rate_day || B.base_day);
+  const dtxt = `${days < 10 ? days.toFixed(1) : Math.round(days)} days of money`;
+  const L0 = B.today_left;
+  if (a <= L0){
+    el.className = "can yes"; el.innerHTML = `Yes, go for it. <small>Leaves ${money(L0 - a)} for today. It's ${dtxt}.</small>`;
+    return;
+  }
+  const short = a - Math.max(0, L0), wait = Math.ceil(short / B.base_day);
+  const next = B.base_day + Math.min(0, L0 - a) / B.remaining;
+  if (wait <= 2){
+    el.className = "can meh"; el.innerHTML = `Not today, but close. <small>${wait} quiet day${wait > 1 ? "s" : ""} and it's stacked, guilt free. Buy it now and every day till ${esc(B.floor_label)} is ${money(next)} instead of ${money(B.base_day)}.</small>`;
+  } else {
+    el.className = "can no"; el.innerHTML = `That's ${money(short)} more than today has. <small>It'd take ${wait} quiet days to stack. Now, every day till ${esc(B.floor_label)} drops to ${money(next)}. It's ${dtxt}. Cheaper version?</small>`;
+  }
+}
+$("#what").addEventListener("input", canI);
+
+// ---------------- the one box: type it, tap what it was. Dated today, always. ----------------
+const nudge = () => { $("#box").classList.add("nudge"); setTimeout(() => $("#box").classList.remove("nudge"), 450); };
+document.querySelectorAll("#picks [data-feel]").forEach(b => b.onclick = async () => {
+  const text = $("#what").value.trim(), feel = b.dataset.feel;
+  if (!/\d/.test(text)){ nudge();
+    $("#toast").innerHTML = `<div class="toast">Put the amount in too, like <b style="display:inline;font-size:inherit">chipotle 14</b>.</div>`; $("#what").focus(); return; }
+  try {
+    const r = await post("/api/add", {text, feel});
+    $("#what").value = ""; $("#what").focus(); canI();
+    if (feel === "wish"){
+      $("#toast").innerHTML = `<div class="toast" style="--c:var(--wish)"><b>On the wishlist.</b>The receipt shows what each price costs you in days, and how many you've earned. Tip: type a range, like 50-70.</div>`;
+    } else {
+      $("#toast").innerHTML = `<div class="toast" style="--c:var(--${feel})"><button class="undo" id="undo">Undo</button><b>${esc(r.title)}</b>${esc(r.line)}</div>`;
+      $("#undo").onclick = () => post("/api/delete", {id:r.id}).then(() => { $("#toast").innerHTML = ""; load(); });
+    }
+    load();
+  } catch(e){ $("#toast").innerHTML = `<div class="toast">${esc(e.message === "no amount" ? "Couldn't find an amount in that." : e.message)}</div>`; }
+});
+$("#what").addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); nudge(); $("#picks button").focus(); } });
+$("#potForm").onsubmit = e => { e.preventDefault(); const d = Object.fromEntries(new FormData(e.target)); post("/api/pot", {pot:+d.pot}).then(load); };
+
+// ---------------- ceremonies ----------------
+// Captions use his real numbers. The template is random each time so it doesn't go stale.
+const pick = a => a[Math.floor(Math.random() * a.length)];
+function memeFor(c){
+  if (c.kind === "wish") return pick([
+    ["leo-cheers.jpg", `${c.name}`, "earned, not asked for"],
+    ["success-kid.jpg", `wanted the ${c.name}`, `earned the ${c.name}`],
+    ["laughing-leo.png", "me opening Vinted", `with ${c.earned} days earned`],
+    ["roll-safe.jpg", "can't run out of money", "if you earned it first"]]);
+  if (c.kind === "win") return pick([
+    ["success-kid.jpg", `spent ${m0(c.spent)} this week`, `money lasts ${c.moved} days longer`],
+    ["roll-safe.jpg", "can't run out of money", "if it keeps lasting longer"],
+    ["leo-cheers.jpg", `+${c.moved} days`, `lasts till ${c.after}`],
+    ["laughing-leo.png", `me pushing broke day to ${c.after}`, "while everyone's at Wawa"]]);
+  const d = -c.moved;
+  return pick([
+    ["this-is-fine.jpg", `money runs out ${d} days sooner`, "this is fine"],
+    ["harold.jpg", `spent ${m0(c.spent)} this week`, `broke ${d} days earlier now`],
+    ["pikachu.jpg", `spends ${m0(c.spent)} in a week`, `money now runs out ${c.after}`],
+    ["skeleton.jpg", "me waiting to afford the Beats Pill", `after losing ${d} days`],
+    ["bad-luck-brian.jpg", "makes the money last", `for ${d} fewer days`]]);
+}
+function ceremony(c, preview){
+  cerOn = true;
+  const el = $("#cer"), card = $("#cerCard"), [img, top, bot] = memeFor(c);
+  el.className = "cer " + c.kind;
+  el.style.background = c.kind === "fail" ? "#151a1f" : "radial-gradient(ellipse at 50% 30%,#2b3d2f,#0c1410)";
+  const meme = `<div class="meme"><img src="/img/memes/${img}" alt=""><div class="cap t">${esc(top)}</div><div class="cap b">${esc(bot)}</div></div>`;
+  if (c.kind === "wish") card.innerHTML = `<p class="k">You earned it</p><h3>The ${esc(c.name)} is yours.</h3>${meme}
+      <p class="why">You pushed your money ${c.earned} days further since you wanted it, and at $${Math.round(c.lo)} it costs ${c.need_days}. Buy it and you're still ahead of where you were.${c.alt ? ` Or keep the days and wait: ${esc(c.alt)}.` : ""}</p>
+      <div class="btns"><button class="main" id="cerGo">Buying it</button><button class="ghost" id="cerLater">Keep the days</button></div>`;
+  else if (c.kind === "win") card.innerHTML = `<p class="k">Week of ${esc(c.label)}</p><h3>+${c.moved} days.</h3>${meme}
+      <p class="why">${money(c.spent)} out, and your money now lasts till ${esc(c.after)} instead of ${esc(c.before)}.</p>
+      <div class="btns"><button class="main" id="cerLater">Next week</button></div>`;
+  else card.innerHTML = `<p class="k">Week of ${esc(c.label)}</p><h3>${-c.moved} days gone.</h3>${meme}
+      <p class="why">${money(c.spent)} out, so the money runs out ${esc(c.after)} instead of ${esc(c.before)}. A quiet week wins them back.</p>
+      <div class="btns"><button class="main" id="cerLater">Fresh week</button></div>`;
+  el.hidden = false; requestAnimationFrame(() => el.classList.add("on"));
+  const stop = particles(c.kind === "fail" ? "rain" : c.kind === "wish" ? "confetti" : "leaves");
+  const close = () => { stop(); el.classList.remove("on"); setTimeout(() => { el.hidden = true; cerOn = false; }, 500);
+    return preview ? Promise.resolve() : post("/api/ceremony", {key:c.key}); };
+  $("#cerLater").onclick = () => close().then(() => !preview && load());
+  if ($("#cerGo")) $("#cerGo").onclick = () => close().then(() => { if (!preview) load().then(() => { const b = document.querySelector(`[data-buy="${c.wish_id}"]`); if (b) b.click(); }); });
+  $("#cerLater").focus();
+}
+
+function particles(kind){
+  const cv = $("#fx"), ctx = cv.getContext("2d");
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return () => {};
+  const dpr = devicePixelRatio || 1;
+  const size = () => { cv.width = innerWidth*dpr; cv.height = innerHeight*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); };
+  size(); addEventListener("resize", size);
+  const LEAF = kind === "confetti" ? ["#ffd66b","#ff8fb4","#9fe3ff","#7cf0a8","#c7a4ff","#ffffff"] : ["#e8a33d","#d9642b","#f2c14e","#b8452b","#8fb948","#f5d67b"];
+  if (kind === "confetti") kind = "leaves";
+  const N = kind === "leaves" ? (LEAF[0] === "#ffd66b" ? 160 : 70) : 160, parts = [];
+  const spawn = (y) => kind === "leaves"
+    ? {x:Math.random()*innerWidth, y, r:6+Math.random()*8, vy:.6+Math.random()*1.2, sway:Math.random()*6.28, rot:Math.random()*6.28, vr:(Math.random()-.5)*.06, c:LEAF[Math.floor(Math.random()*LEAF.length)]}
+    : {x:Math.random()*innerWidth, y, l:12+Math.random()*16, vy:7+Math.random()*6};
+  for (let i=0;i<N;i++) parts.push(spawn(Math.random()*innerHeight - innerHeight));
+  let on = true, t = 0;
+  (function frame(){
+    if (!on) return; t++;
+    ctx.clearRect(0,0,innerWidth,innerHeight);
+    for (const p of parts){
+      if (kind === "leaves"){
+        p.y += p.vy; p.sway += .02; p.x += Math.sin(p.sway)*.9; p.rot += p.vr;
+        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle = p.c; ctx.globalAlpha = .9;
+        ctx.beginPath(); ctx.ellipse(0,0,p.r,p.r*.45,0,0,6.283); ctx.fill();
+        ctx.strokeStyle = "rgba(0,0,0,.18)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-p.r,0); ctx.lineTo(p.r,0); ctx.stroke(); ctx.restore();
+      } else {
+        p.y += p.vy; p.x -= p.vy*.12;
+        ctx.strokeStyle = "rgba(210,225,235,.35)"; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(p.x - p.l*.12, p.y + p.l); ctx.stroke();
+      }
+      if (p.y > innerHeight + 20) Object.assign(p, spawn(-20));
+    }
+    requestAnimationFrame(frame);
+  })();
+  return () => { on = false; ctx.clearRect(0,0,innerWidth,innerHeight); removeEventListener("resize", size); };
+}
+
+// one tooltip for every mark
+const tip = $("#tip");
+function showTip(el){ const r = el.getBoundingClientRect(); tip.textContent = el.dataset.tip;
+  tip.style.left = Math.min(innerWidth - 90, Math.max(90, r.left + r.width/2)) + "px"; tip.style.top = r.top + "px"; tip.classList.add("on"); }
+document.addEventListener("mouseover", e => { const el = e.target.closest("[data-tip]"); el ? showTip(el) : tip.classList.remove("on"); });
+document.addEventListener("focusin", e => { const el = e.target.closest("[data-tip]"); el ? showTip(el) : tip.classList.remove("on"); });
+addEventListener("scroll", () => tip.classList.remove("on"), {passive:true});
+
+fetch("/img/forests.json").then(r => r.ok ? r.json() : []).catch(() => []).then(f => { FORESTS = f; pickForest(); })
+  .then(load).then(() => {
+    // ?ceremony=wish | win | fail previews a moment without saving anything
+    const pv = new URLSearchParams(location.search).get("ceremony");
+    const g = S.goal || {name:"Beats Pill", lo:50, hi:70, where_:"Vinted"};
+    if (pv === "wish") ceremony({kind:"wish", key:"preview", name:g.name, lo:g.lo, hi:g.hi, where:g.where_, earned:9, need_days:7, alt:g.alt}, true);
+    if (pv === "win")  ceremony({kind:"win", key:"preview", label:"28 Sep to 4 Oct", spent:31.5, moved:12, before:"2 Feb", after:"14 Feb"}, true);
+    if (pv === "fail") ceremony({kind:"fail", key:"preview", label:"28 Sep to 4 Oct", spent:121, moved:-9, before:"2 Feb", after:"24 Jan"}, true);
+  });
+</script>
+</body>
+</html>

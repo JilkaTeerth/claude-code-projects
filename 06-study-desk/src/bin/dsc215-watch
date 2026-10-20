@@ -1,0 +1,123 @@
+#!/usr/bin/env python3
+"""DSC 215 handout watcher. Runs after every canvas-sweep.
+
+the professor announces everything inside his lecture handouts (m215dayNN...HO.pdf), not on
+Canvas: quiz and exam coverage ("Quiz 3 is on Thursday 10/1 ... Coverage: Chapters 6 and 7")
+and each homework's exercise list ("Homework #6 ... Do the following exercises: ...").
+Canvas assignments like H6 have empty descriptions, so without this nobody knows what to do.
+
+For each new announcement it creates ONE Todoist task in the DSC 215 project, deduped by a
+[watch:<key>] stamp in the description (stateless, same trick as canvas-sweep):
+  * Quiz/Exam N  -> "Build DSC 215 Quiz N study guide (<coverage>)", closed automatically once
+                    Study Guides/dsc-215-quiz-N.html (or exam-N) exists.
+  * Homework #N  -> "Build H<N> template (<exercises>)", closed once HW<N>/m215hwk<N>.Rmd exists.
+These are prompts for Teerth to say "build it" to Claude. The recipe lives in
+~/.study-desk/guides/README.md.
+
+Usage: dsc215-watch [--dry-run]
+"""
+import json, os, re, sys, urllib.request, subprocess
+
+DRY = "--dry-run" in sys.argv
+COURSE = "25857"
+SRC = os.path.expanduser("~/.study-desk/src/DSC215")
+NOTES = os.path.expanduser("~/Desktop/F&M Notes/DSC 215")
+PROJECT = "6hQqW752h267q9HF"   # Todoist: DSC 215
+
+def env(path):
+    out = {}
+    for l in open(os.path.expanduser(path)):
+        if "=" in l and not l.strip().startswith("#"):
+            k, v = l.strip().replace("export ", "").split("=", 1)
+            out[k.strip()] = v.strip().strip("'\"")
+    return out
+
+cv, td = env("~/.canvas_env"), env("~/.todoist_env")
+HOST = cv.get("CANVAS_HOST", "fandm.instructure.com").rstrip("/")
+if not HOST.startswith("http"): HOST = "https://" + HOST
+CTOK, TTOK = cv["CANVAS_TOKEN"], td["TODOIST_TOKEN"]
+
+def get(url, tok, method="GET", body=None):
+    r = urllib.request.Request(url, method=method, headers={"Authorization": "Bearer " + tok})
+    if body is not None:
+        r.add_header("Content-Type", "application/json"); r.data = json.dumps(body).encode()
+    with urllib.request.urlopen(r, timeout=60) as f:
+        raw = f.read()
+    return json.loads(raw) if raw[:1] in (b"{", b"[") else raw
+
+def handout_texts():
+    """Download any handout we don't have yet, return {name: text} newest last."""
+    import fitz
+    os.makedirs(SRC, exist_ok=True)
+    files = get(HOST + "/api/v1/courses/%s/files?per_page=100" % COURSE, CTOK)
+    out = {}
+    for f in sorted(files, key=lambda f: f["created_at"]):
+        n = f["display_name"]
+        if not re.match(r"m215day\d+.*\.pdf$", n): continue
+        pdf, txt = os.path.join(SRC, n), os.path.join(SRC, n[:-4] + ".txt")
+        if not os.path.exists(txt):
+            open(pdf, "wb").write(get(f["url"], CTOK))
+            open(txt, "w").write("".join(p.get_text() for p in fitz.open(pdf)))
+        out[n] = open(txt).read()
+        import datetime
+        age = datetime.datetime.now(datetime.timezone.utc) - datetime.datetime.fromisoformat(f["created_at"].replace("Z", "+00:00"))
+        if age.days > 12: OLD.add(n)
+    return out
+
+OLD = set()   # handouts whose announcements are history, filled in handout_texts()
+
+def parse(texts):
+    found = {}
+    for name, t in texts.items():
+        if name in OLD: continue
+        flat = re.sub(r"\s+", " ", t)
+        for m in re.finditer(r"(Quiz|Exam) (\d+)\W+(?:is )?[Oo]n ([^.–]*?)(?:during|\.|–| - ).{0,200}?Coverage:\s*([^•]+?)(?= •| –|$)", flat):
+            kind, n, when, cov = m.group(1), m.group(2), m.group(3).strip(), m.group(4).strip(" .")
+            found["%s%s" % (kind.lower(), n)] = dict(kind=kind, n=n, when=when, what=cov, src=name)
+        for m in re.finditer(r"Homework #(\d+) • (.*?)Do the following exercises:\s*([0-9A-Za-z.,\s]+?)(?= •| \d+ |$)", flat):
+            n, ex = m.group(1), m.group(3).strip(" ,")
+            k = "hw%s" % n
+            prev = found.get(k)
+            what = ex if not prev or prev["what"] == ex else prev["what"] + "; " + ex
+            found[k] = dict(kind="Homework", n=n, when="", what=what, src=name)
+    return found
+
+def done_path(key, a):
+    if a["kind"] == "Homework":
+        return os.path.join(NOTES, "HW%s" % a["n"], "m215hwk%s.Rmd" % a["n"])
+    return os.path.join(NOTES, "Study Guides", "dsc-215-%s-%s.html" % (a["kind"].lower(), a["n"]))
+
+def main():
+    ann = parse(handout_texts())
+    tasks = get("https://api.todoist.com/api/v1/tasks?project_id=%s&limit=200" % PROJECT, TTOK)
+    tasks = tasks.get("results", tasks) if isinstance(tasks, dict) else tasks
+    have = {}
+    for t in tasks:
+        m = re.search(r"\[watch:([a-z0-9]+)\]", t.get("description") or "")
+        if m: have[m.group(1)] = t
+    made = closed = 0
+    for key, a in sorted(ann.items()):
+        built = os.path.exists(done_path(key, a))
+        if key in have:
+            if built and not DRY:
+                get("https://api.todoist.com/api/v1/tasks/%s/close" % have[key]["id"], TTOK, "POST", {})
+                closed += 1
+            continue
+        if built: continue
+        if a["kind"] == "Homework":
+            title = "Build H%s template (%s)" % (a["n"], a["what"])
+        else:
+            title = "Build DSC 215 %s %s study guide (%s)" % (a["kind"], a["n"], a["what"])
+        desc = ("[watch:%s]\nFound in %s. %s\nSay 'build it' to Claude. Recipe: ~/.study-desk/guides/README.md"
+                % (key, a["src"], ("Date: " + a["when"]) if a["when"] else ""))
+        print("NEW:", title)
+        if not DRY:
+            get("https://api.todoist.com/api/v1/tasks", TTOK, "POST",
+                {"content": title, "description": desc, "project_id": PROJECT, "priority": 4, "due_string": "today"})
+            subprocess.run(["/opt/homebrew/bin/terminal-notifier", "-title", "DSC 215", "-message", title],
+                           capture_output=True)
+        made += 1
+    print("dsc215-watch: %d announcements, %d new tasks, %d closed" % (len(ann), made, closed))
+
+if __name__ == "__main__":
+    main()

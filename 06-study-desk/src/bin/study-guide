@@ -1,0 +1,301 @@
+#!/usr/bin/env python3
+"""Build study guides from real course material, then put them on his Todoist.
+
+The guides are ASSEMBLED from each professor's own schedule table, assigned problems,
+textbook sections and posted handouts. That matters for two reasons:
+  1. MAT 230's syllabus bans generative AI outright ("Do not use genAI in this
+     course"). A guide that only organises the professor's own material and points at textbook
+     pages respects that. Never add generated explanation to a MAT 230 guide.
+  2. Assembled material is simply more accurate. The exact problems the professor assigned beat
+     anything invented.
+
+Usage: study-guide [--days N] [--dry-run] [--force]
+"""
+import json, os, re, sys, datetime, urllib.request, urllib.error
+
+DRY   = "--dry-run" in sys.argv
+FORCE = "--force" in sys.argv
+DAYS  = 21
+if "--days" in sys.argv:
+    DAYS = int(sys.argv[sys.argv.index("--days") + 1])
+
+SYL   = os.path.expanduser("~/.study-desk/syllabus.json")
+NOTES = os.path.expanduser("~/Desktop/F&M Notes")
+TBASE = "https://api.todoist.com/api/v1"
+TODAY = datetime.date.today()
+
+def env(path):
+    o = {}
+    p = os.path.expanduser(path)
+    if os.path.exists(p):
+        for line in open(p):
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                k, v = line.split("=", 1); o[k.strip()] = v.strip()
+    return o
+
+CV, TD = env("~/.canvas_env"), env("~/.todoist_env")
+HOST, CTOK, TTOK = CV.get("CANVAS_HOST","").rstrip("/"), CV.get("CANVAS_TOKEN",""), TD.get("TODOIST_TOKEN","")
+
+def todoist(path, method="GET", body=None):
+    data = json.dumps(body).encode() if body is not None else None
+    h = {"Authorization": "Bearer " + TTOK}
+    if data: h["Content-Type"] = "application/json"
+    r = urllib.request.Request(TBASE + path, data=data, headers=h, method=method)
+    try:
+        with urllib.request.urlopen(r, timeout=40) as z:
+            raw = z.read().decode().strip()
+            return json.loads(raw) if raw else None
+    except urllib.error.HTTPError as e:
+        sys.exit("FATAL Todoist %s: %s" % (e.code, e.read().decode()[:300]))
+
+def td_list(path):
+    out, c = [], None
+    while True:
+        p = path + (("&" if "?" in path else "?") + "cursor=" + c if c else "")
+        d = todoist(p)
+        if isinstance(d, list): return d
+        out.extend(d.get("results", d.get("items", []))); c = d.get("next_cursor")
+        if not c: return out
+
+def canvas(path):
+    r = urllib.request.Request(HOST + path, headers={"Authorization": "Bearer " + CTOK})
+    return json.load(urllib.request.urlopen(r, timeout=40))
+
+def slug(s):
+    return re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
+
+def dparse(s):
+    return datetime.date(*[int(x) for x in s.split("-")])
+
+# ---------------------------------------------------------------- assessments
+
+def dsc_quiz_dates():
+    """the professor: 'starting on the second Thursday and then every second Thursday'.
+    Quiz 1 landed 3 Sep and Quiz 2 on 17 Sep, which anchors the fortnightly cadence."""
+    d, out, n = datetime.date(2026, 9, 3), [], 1
+    while d < datetime.date(2026, 12, 12):
+        out.append((("Quiz %d" % n), d)); d += datetime.timedelta(days=14); n += 1
+    return out
+
+def upcoming(syl):
+    """Everything worth a guide inside the window."""
+    out = []
+    for a in syl["courses"]["MAT 230"]["assessments"]:
+        out.append({"course": "MAT 230", "name": a["name"],
+                    "date": dparse(a["date"]), "covers": a["covers"]})
+    for name, d in dsc_quiz_dates():
+        out.append({"course": "DSC 215", "name": name, "date": d, "covers": ""})
+    for cid, code in [("25520","CPS 112"), ("25561","ANT 100")]:
+        try:
+            items = canvas("/api/v1/courses/%s/assignments?per_page=100" % cid)
+        except Exception:
+            continue
+        for a in items:
+            if not a.get("due_at"): continue
+            if not re.search(r"quiz|exam|test|midterm|final|paper|proposal", a["name"], re.I):
+                continue
+            d = datetime.datetime.strptime(a["due_at"], "%Y-%m-%dT%H:%M:%SZ").date()
+            out.append({"course": code, "name": a["name"], "date": d, "covers": ""})
+    lo, hi = TODAY, TODAY + datetime.timedelta(days=DAYS)
+    seen, keep = set(), []
+    for a in sorted(out, key=lambda x: x["date"]):
+        if not (lo <= a["date"] <= hi): continue
+        k = (a["course"], a["name"])
+        if k in seen: continue
+        seen.add(k); keep.append(a)
+    return keep
+
+# ---------------------------------------------------------------- guide bodies
+
+def prof_handouts(a):
+    """the professor posts his own study handouts to Canvas. Linking his beats anything else."""
+    try:
+        files = canvas("/api/v1/courses/25929/files?per_page=100")
+    except Exception:
+        return []
+    n = re.sub(r"[^0-9]", "", a["name"]) or "1"
+    out = []
+    for f in files:
+        dn = f.get("display_name", "")
+        if re.search(r"stud", dn, re.I) and (n in dn or "Study" in dn):
+            out.append((dn, f.get("url", "").split("?")[0] or dn))
+    return out
+
+def mat230_guide(syl, a):
+    """Strictly assembled. the professor bans genAI in this course, so this adds no explanation
+    of its own: it is an index into his schedule, his assigned problems and the book."""
+    c = syl["courses"]["MAT 230"]
+    sched = c["schedule"]; off = c["pdf_page_offset"]
+    tests = sorted(c["assessments"], key=lambda x: x["date"])
+    prev = None
+    for t in tests:
+        if dparse(t["date"]) < a["date"]: prev = dparse(t["date"])
+    lo = prev or datetime.date(2026, 8, 24)
+    rows = [r for r in sched if lo < dparse(r["date"]) < a["date"]]
+
+    L = []
+    L.append("# MAT 230 %s study guide" % a["name"])
+    L.append("")
+    L.append("**Date:** %s   **Covers:** %s   **Worth:** 15 of 100 course points"
+             % (a["date"].strftime("%a %d %b"), a["covers"] or "see below"))
+    L.append("")
+    L.append("> Assembled from the professor's own syllabus schedule, his assigned problems and "
+             "the textbook. No AI generated content, because the MAT 230 syllabus prohibits "
+             "generative AI in this course.")
+    L.append("")
+    L.append("**Textbook:** %s. PDF page = printed page + %d." % (c["textbook"], off))
+    L.append("")
+    L.append("## What is actually on it")
+    L.append("")
+    topics, _seen = [], set()
+    for r in rows:
+        if r["is_test"] or r["is_review"]: continue
+        if r["topic"] in _seen: continue      # the professor spends 2 days on 3.4, list it once
+        _seen.add(r["topic"]); topics.append(r)
+    for r in topics:
+        mark = " (lab)" if r["is_lab"] else ""
+        L.append("- [ ] **%s**%s  <sub>%s</sub>" % (r["topic"], mark,
+                 dparse(r["date"]).strftime("%d %b")))
+    L.append("")
+    secs = []
+    for r in topics:
+        for s_ in r["sections"]:
+            if s_ not in secs: secs.append(s_)
+    if secs:
+        L.append("## Sections to reread")
+        L.append("")
+        L.append("Sections: " + ", ".join(secs))
+        L.append("")
+    L.append("## Redo these problems")
+    L.append("")
+    L.append("These are the exact Daily Homework problems the professor assigned over this stretch. "
+             "If you can do all of them cold, you are ready.")
+    L.append("")
+    for r in rows:
+        if r["daily_hw"]:
+            L.append("- [ ] %s  <sub>set %s</sub>" % (r["daily_hw"], dparse(r["date"]).strftime("%d %b")))
+    L.append("")
+    posted = prof_handouts(a)
+    if posted:
+        L.append("## the professor's own handouts for this test")
+        L.append("")
+        for n, u in posted:
+            L.append("- [%s](%s)" % (n, u))
+        L.append("")
+    L.append("## Before the test")
+    L.append("")
+    L.append("- [ ] Office hours: Mon 9 to 10am, Wed and Fri 1:30 to 2:30pm, Stager 209")
+    L.append("- [ ] Mathematica may be allowed, check with him")
+    L.append("- [ ] Write ups: restate the problem, full sentences, first person, clear final answer")
+    return "\n".join(L)
+
+def generic_guide(syl, a):
+    c = syl["courses"].get(a["course"], {})
+    sched = c.get("schedule", [])
+    lo = a["date"] - datetime.timedelta(days=15)
+    rows = [r for r in sched if lo <= dparse(r["date"]) < a["date"]]
+    L = []
+    L.append("# %s %s study guide" % (a["course"], a["name"]))
+    L.append("")
+    L.append("**Date:** %s" % a["date"].strftime("%a %d %b"))
+    if c.get("quiz_rule"):
+        L.append("")
+        L.append("**Rule that matters:** " + c["quiz_rule"])
+    L.append("")
+    if c.get("ai_policy"):
+        L.append("> AI policy for this course: " + c["ai_policy"])
+        L.append("")
+    if rows:
+        L.append("## Covered in the run up")
+        L.append("")
+        for r in rows:
+            bits = [r.get("topic","")]
+            if r.get("readings"): bits.append("reading %s" % r["readings"])
+            if r.get("slides"):   bits.append("slides %s" % r["slides"])
+            L.append("- [ ] " + "  ".join(b for b in bits if b) +
+                     "  <sub>%s</sub>" % dparse(r["date"]).strftime("%d %b"))
+        L.append("")
+    else:
+        L.append("## Topics")
+        L.append("")
+        L.append("No class-by-class table is published on Canvas for this course, so pull the "
+                 "topics from your own notes and the announcements. Ask Claude to fill this in "
+                 "once you say which weeks it covers.")
+        L.append("")
+    L.append("## Checklist")
+    L.append("")
+    L.append("- [ ] Reread your notes for each item above")
+    L.append("- [ ] Redo every worked example from the slides")
+    L.append("- [ ] Write down the two things you still cannot explain out loud")
+    L.append("- [ ] Take those two things to office hours")
+    return "\n".join(L)
+
+# ---------------------------------------------------------------- main
+
+def main():
+    if not os.path.exists(SYL):
+        sys.exit("no syllabus.json, run ~/.study-desk/parse_syllabus.py first")
+    syl = json.load(open(SYL))
+    items = upcoming(syl)
+    if not items:
+        print("nothing to build in the next %d days" % DAYS); return
+
+    projects = {p["name"]: p["id"] for p in td_list("/projects")}
+    existing = {}
+    for t in td_list("/tasks"):
+        m = re.search(r"\[guide:([^\]]+)\]", t.get("description") or "")
+        if m: existing[m.group(1)] = t
+    # Guides he has already ticked off must not come back as new tasks.
+    done_guides = set()
+    try:
+        _now = datetime.datetime.now(datetime.timezone.utc)
+        for t in td_list("/tasks/completed/by_completion_date?since=%s&until=%s" % (
+                (_now - datetime.timedelta(days=80)).strftime("%Y-%m-%dT%H:%M:%S"),
+                _now.strftime("%Y-%m-%dT%H:%M:%S"))):
+            m = re.search(r"\[guide:([^\]]+)\]", t.get("description") or "")
+            if m: done_guides.add(m.group(1))
+    except BaseException as e:
+        print("warn: completed-guide lookup failed (%s); ticked guides may reappear this run" % e)
+
+    built = 0
+    for a in items:
+        name = "%s %s" % (a["course"], a["name"])
+        key = slug(name)
+        body = mat230_guide(syl, a) if a["course"] == "MAT 230" else generic_guide(syl, a)
+        folder = os.path.join(NOTES, a["course"], "Study Guides")
+        fn = os.path.join(folder, key + ".md")
+        if DRY:
+            print("would write %s (%d lines)" % (fn, body.count("\n") + 1)); built += 1; continue
+        os.makedirs(folder, exist_ok=True)
+        # A guide that has been hand enriched (real page numbers, what is NOT on the
+        # test, a dated plan) is far better than anything this script can assemble, so
+        # it is never overwritten, not even with --force.
+        enriched = os.path.exists(fn) and "<!-- enriched -->" in open(fn).read()
+        if not enriched and (FORCE or not os.path.exists(fn)):
+            open(fn, "w").write(body + "\n")
+        url = "http://localhost:7474/guide/%s" % key
+        start = a["date"] - datetime.timedelta(days=4)
+        if start < TODAY: start = TODAY
+        desc = ("[guide:%s]\nOpen it: %s\nFile: %s\n\nBuilt from %s's own course schedule."
+                % (key, url, fn, syl["courses"].get(a["course"], {}).get("prof", "the professor")))
+        payload = {"content": "Study guide ready: %s" % name,
+                   "description": desc, "priority": 3,
+                   "due_date": start.isoformat()}
+        if key in existing:
+            todoist("/tasks/%s" % existing[key]["id"], "POST",
+                    {"description": desc, "due_date": start.isoformat()})
+            print("updated task  %-34s -> %s" % (name, url))
+        elif key in done_guides:
+            print("already done  %-34s (not recreating the task)" % name)
+        else:
+            pid = projects.get(a["course"])
+            if pid: payload["project_id"] = pid
+            todoist("/tasks", "POST", payload)
+            print("created task  %-34s -> %s" % (name, url))
+        print("   %s %s" % ("kept hand written" if enriched else "file", fn))
+        built += 1
+    print("--- %d guide(s) ---" % built)
+
+if __name__ == "__main__":
+    main()
