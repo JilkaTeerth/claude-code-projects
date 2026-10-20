@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/banner.svg" alt="Claude Code Projects" width="100%"></p>
+
 # Claude Code projects
 
 Everything I've built with Claude Code: automations, apps, tools, client work and the skills and agents I made along the way. I come up with the idea, make the calls and give the feedback. Claude Code does most of the building. Every project here is real and most of them I use every week.
